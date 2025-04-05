@@ -2,28 +2,18 @@ import SwiftUI
 
 @main
 struct PTTrackerApp: App {
-    @StateObject private var authManager = AuthManager()
-    @StateObject private var symptomsViewModel: SymptomsViewModel
-    @StateObject private var chatViewModel: ChatViewModel
-    
-    init() {
-        let auth = AuthManager()
-        _authManager = StateObject(wrappedValue: auth)
-        _symptomsViewModel = StateObject(wrappedValue: SymptomsViewModel(authManager: auth))
-        _chatViewModel = StateObject(wrappedValue: ChatViewModel(authManager: auth))
-    }
+    @StateObject private var authManager = AuthManager.shared
+    @StateObject private var symptomsViewModel = SymptomsViewModel(authManager: AuthManager.shared)
+    @StateObject private var chatViewModel = ChatViewModel(authManager: AuthManager.shared)
+    @StateObject private var recoveryPlanViewModel = RecoveryPlanViewModel(authManager: AuthManager.shared)
     
     var body: some Scene {
         WindowGroup {
-            if authManager.isAuthenticated {
-                DashboardView()
-                    .environmentObject(authManager)
-                    .environmentObject(symptomsViewModel)
-                    .environmentObject(chatViewModel)
-            } else {
-                LandingView()
-                    .environmentObject(authManager)
-            }
+            ContentView()
+                .environmentObject(authManager)
+                .environmentObject(symptomsViewModel)
+                .environmentObject(chatViewModel)
+                .environmentObject(recoveryPlanViewModel)
         }
     }
 } 

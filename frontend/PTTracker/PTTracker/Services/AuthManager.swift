@@ -2,6 +2,9 @@ import Foundation
 import SwiftUI
 
 class AuthManager: ObservableObject {
+    // Shared singleton instance
+    static let shared = AuthManager()
+    
     @Published var isAuthenticated = false
     @Published var currentUser: User?
     @Published var authToken: String?
