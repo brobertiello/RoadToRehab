@@ -2,48 +2,75 @@ import SwiftUI
 
 struct DashboardView: View {
     @EnvironmentObject var authManager: AuthManager
+    @EnvironmentObject var chatViewModel: ChatViewModel
     @State private var selectedTab = 0
+    @State private var showChatView = false
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            NavigationView {
-                ProfileView()
+        ZStack {
+            TabView(selection: $selectedTab) {
+                NavigationView {
+                    ProfileView()
+                }
+                .tabItem {
+                    Image(systemName: "person.fill")
+                    Text("Profile")
+                }
+                .tag(0)
+                
+                NavigationView {
+                    SymptomsView()
+                }
+                .tabItem {
+                    Image(systemName: "waveform.path.ecg")
+                    Text("Symptoms")
+                }
+                .tag(1)
+                
+                NavigationView {
+                    RecoveryPlanView()
+                }
+                .tabItem {
+                    Image(systemName: "figure.walk")
+                    Text("Recovery")
+                }
+                .tag(2)
+                
+                NavigationView {
+                    SettingsView()
+                }
+                .tabItem {
+                    Image(systemName: "gear")
+                    Text("Settings")
+                }
+                .tag(3)
             }
-            .tabItem {
-                Image(systemName: "person.fill")
-                Text("Profile")
-            }
-            .tag(0)
+            .accentColor(.blue)
             
-            NavigationView {
-                SymptomsView()
+            // Floating Chat Button
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Button {
+                        showChatView = true
+                    } label: {
+                        Image(systemName: "message.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.white)
+                            .frame(width: 60, height: 60)
+                            .background(Color.blue)
+                            .clipShape(Circle())
+                            .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 3)
+                    }
+                    .padding(.trailing, 20)
+                    .padding(.bottom, 80) // Keep above tab bar
+                }
             }
-            .tabItem {
-                Image(systemName: "waveform.path.ecg")
-                Text("Symptoms")
-            }
-            .tag(1)
-            
-            NavigationView {
-                RecoveryPlanView()
-            }
-            .tabItem {
-                Image(systemName: "figure.walk")
-                Text("Recovery")
-            }
-            .tag(2)
-            
-            NavigationView {
-                SettingsView()
-            }
-            .tabItem {
-                Image(systemName: "gear")
-                Text("Settings")
-            }
-            .tag(3)
         }
-        .accentColor(.blue)
-        .environmentObject(authManager)
+        .sheet(isPresented: $showChatView) {
+            ChatView(viewModel: chatViewModel)
+        }
     }
 }
 
