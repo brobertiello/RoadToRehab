@@ -25,6 +25,17 @@ struct SettingsView: View {
                 Text("Privacy settings")
             }
             
+            /* Comment out until we fix the error
+            Section(header: Text("Admin")) {
+                NavigationLink(destination: DatabaseConfigView()) {
+                    HStack {
+                        Image(systemName: "server.rack")
+                        Text("Database Configuration")
+                    }
+                }
+            }
+            */
+            
             Section(header: Text("Support")) {
                 Text("Contact support")
                 Text("Report a bug")

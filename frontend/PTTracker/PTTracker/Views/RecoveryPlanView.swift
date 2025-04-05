@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct RecoveryPlanView: View {
     @EnvironmentObject var authManager: AuthManager
@@ -165,12 +166,28 @@ struct RecoveryPlanView: View {
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
+                .fixedSize(horizontal: false, vertical: true)
             
-            // Note: Removed duplicate Generate Plan button since it's already in the nav bar
+            // Add a button here to simplify the UI and avoid emoji search issues
+            Button(action: {
+                showGeneratePlanConfirmation = true
+            }) {
+                Text("Create Recovery Plan")
+                    .padding()
+                    .frame(minWidth: 200)
+                    .background(Color.accentColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .padding(.top, 20)
         }
         .padding(.vertical, 60)
         .padding(.horizontal)
         .frame(maxWidth: .infinity)
+        .onAppear {
+            // Force dismiss keyboard if it's open
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
     }
     
     private var recoveryPlanContent: some View {

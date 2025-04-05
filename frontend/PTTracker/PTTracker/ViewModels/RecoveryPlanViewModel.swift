@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UIKit
 
 class RecoveryPlanViewModel: ObservableObject {
     @Published var recoveryPlan: RecoveryPlanDetails?
@@ -151,23 +152,21 @@ class RecoveryPlanViewModel: ObservableObject {
     }
     
     func loadSavedPlan() async {
-        print("Loading saved recovery plan...")
         do {
             if let savedPlan = try await recoveryPlanService.getSavedRecoveryPlan() {
-                print("Successfully loaded recovery plan")
+                print("Saved recovery plan loaded")
                 
-                // Debug output of completion status
+                // Count completed exercises for validation
                 var completedCount = 0
-                for (weekIndex, week) in savedPlan.plan.weeks.enumerated() {
-                    print("Week \(week.weekNumber) (index \(weekIndex)):")
-                    for (exIndex, ex) in week.exercises.enumerated() {
-                        print("  Exercise \(exIndex): \(ex.name), completed: \(ex.isCompleted), id: \(ex.id)")
-                        if ex.isCompleted {
+                for week in savedPlan.plan.weeks {
+                    for exercise in week.exercises {
+                        if exercise.isCompleted {
                             completedCount += 1
+                            print("Found completed exercise: \(exercise.name)")
                         }
                     }
                 }
-                print("Plan has \(completedCount) completed exercises")
+                print("Loaded recovery plan with \(completedCount) completed exercises")
                 
                 DispatchQueue.main.async {
                     self.recoveryPlan = savedPlan.plan
@@ -196,11 +195,20 @@ class RecoveryPlanViewModel: ObservableObject {
                 print("No saved recovery plan found")
                 DispatchQueue.main.async {
                     self.hasExistingPlan = false
+                    
+                    // Dismiss any active keyboard to prevent emoji search issues
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
                 }
             }
         } catch {
             print("Could not load saved plan: \(error)")
             // Not showing an error to the user since this is done automatically
+            
+            DispatchQueue.main.async {
+                self.hasExistingPlan = false
+            }
         }
     }
     
