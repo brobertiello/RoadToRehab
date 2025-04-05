@@ -10,42 +10,76 @@ struct RecoveryPlanView: View {
     }
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                Color(UIColor.systemBackground)
-                    .ignoresSafeArea()
-                
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        Text("Your Recovery Plan")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .padding(.horizontal)
+        ZStack {
+            Color(UIColor.systemBackground)
+                .ignoresSafeArea()
+            
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Your Recovery Plan")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .padding(.horizontal)
+                    
+                    if viewModel.isLoading {
+                        loadingView
+                    } else if let errorMessage = viewModel.errorMessage {
+                        errorView(message: errorMessage)
+                    } else if viewModel.hasRecoveryPlan {
+                        recoveryPlanContent
                         
-                        if viewModel.isLoading {
-                            loadingView
-                        } else if let errorMessage = viewModel.errorMessage {
-                            errorView(message: errorMessage)
-                        } else if viewModel.hasRecoveryPlan {
-                            recoveryPlanContent
-                        } else {
-                            noPlanView
+                        // Success message if plan was saved
+                        if let successMessage = viewModel.successMessage {
+                            Text(successMessage)
+                                .foregroundColor(.green)
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.green.opacity(0.1))
+                                .cornerRadius(10)
+                                .padding(.horizontal)
+                                .padding(.bottom, 20)
                         }
+                    } else {
+                        noPlanView
                     }
-                    .padding(.vertical)
+                }
+                .padding(.vertical)
+            }
+            
+            // Loading overlay for save
+            if viewModel.isSaving {
+                savingOverlay
+            }
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarItems(trailing: generateButton)
+        .alert("Generate Recovery Plan", isPresented: $showGeneratePlanConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Generate") {
+                Task {
+                    await viewModel.promptToGeneratePlan()
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationBarItems(trailing: generateButton)
-            .alert("Generate Recovery Plan", isPresented: $showGeneratePlanConfirmation) {
-                Button("Cancel", role: .cancel) { }
-                Button("Generate") {
-                    Task {
-                        await viewModel.generatePlan()
-                    }
+        } message: {
+            Text("This will create a personalized recovery plan based on your reported symptoms. Continue?")
+        }
+        .alert("Overwrite Existing Plan?", isPresented: $viewModel.showOverwriteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Overwrite", role: .destructive) {
+                Task {
+                    await viewModel.generatePlan()
                 }
-            } message: {
-                Text("This will create a personalized recovery plan based on your reported symptoms. Continue?")
+            }
+        } message: {
+            Text("You already have a saved recovery plan. Generating a new plan will replace your existing one. Do you want to continue?")
+        }
+        .sheet(isPresented: $viewModel.showExerciseDetail) {
+            if let selectedExercise = viewModel.selectedExercise {
+                ExerciseDetailView(
+                    viewModel: viewModel,
+                    exercise: selectedExercise.exercise,
+                    weekNumber: selectedExercise.weekNumber
+                )
             }
         }
     }
@@ -72,6 +106,25 @@ struct RecoveryPlanView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 100)
+    }
+    
+    private var savingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 20) {
+                ProgressView()
+                    .scaleEffect(1.5)
+                Text("Saving your recovery plan...")
+                    .font(.headline)
+                    .foregroundColor(.white)
+            }
+            .padding(30)
+            .background(Color(UIColor.systemBackground))
+            .cornerRadius(15)
+            .shadow(radius: 10)
+        }
     }
     
     private func errorView(message: String) -> some View {
@@ -113,19 +166,7 @@ struct RecoveryPlanView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
             
-            Button(action: {
-                showGeneratePlanConfirmation = true
-            }) {
-                Text("Generate Recovery Plan")
-                    .fontWeight(.semibold)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.accentColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding(.horizontal, 40)
-            .padding(.top, 10)
+            // Note: Removed duplicate Generate Plan button since it's already in the nav bar
         }
         .padding(.vertical, 60)
         .padding(.horizontal)
@@ -177,12 +218,23 @@ struct RecoveryPlanView: View {
                         Button(action: {
                             viewModel.selectedWeek = week
                         }) {
-                            Text("Week \(week)")
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 16)
-                                .background(viewModel.selectedWeek == week ? Color.accentColor : Color.gray.opacity(0.2))
-                                .foregroundColor(viewModel.selectedWeek == week ? .white : .primary)
-                                .cornerRadius(20)
+                            VStack(spacing: 4) {
+                                Text("Week \(week)")
+                                    .fontWeight(.medium)
+                                
+                                // Progress indicator
+                                let progress = viewModel.getProgressForWeek(week)
+                                if progress.total > 0 {
+                                    Text("\(progress.completed)/\(progress.total)")
+                                        .font(.caption2)
+                                        .foregroundColor(viewModel.selectedWeek == week ? .white.opacity(0.9) : .gray)
+                                }
+                            }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(viewModel.selectedWeek == week ? Color.accentColor : Color.gray.opacity(0.2))
+                            .foregroundColor(viewModel.selectedWeek == week ? .white : .primary)
+                            .cornerRadius(20)
                         }
                     }
                 }
@@ -217,41 +269,80 @@ struct RecoveryPlanView: View {
     }
     
     private func exerciseRow(exercise: RecoveryExercise, index: Int) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top) {
-                Text("\(index + 1).")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(exercise.name)
-                        .font(.headline)
-                        .foregroundColor(.primary)
+        Button(action: {
+            viewModel.showExerciseDetails(exercise: exercise, weekNumber: viewModel.selectedWeek)
+        }) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .top) {
+                    // Exercise number and completion indicator
+                    ZStack {
+                        Circle()
+                            .fill(exercise.isCompleted ? Color.green : Color.gray.opacity(0.2))
+                            .frame(width: 30, height: 30)
+                        
+                        if exercise.isCompleted {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
+                        } else {
+                            Text("\(index + 1)")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    .padding(.top, 2)
                     
-                    Text(exercise.frequency)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(exercise.name)
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                        
+                        Text(exercise.frequency)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.leading, 8)
+                    
+                    Spacer()
+                    
+                    Text(exercise.bodyPart)
+                        .font(.caption)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.accentColor.opacity(0.2))
+                        .foregroundColor(.accentColor)
+                        .cornerRadius(4)
                 }
                 
-                Spacer()
+                Text(exercise.description)
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
                 
-                Text(exercise.bodyPart)
-                    .font(.caption)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.accentColor.opacity(0.2))
-                    .foregroundColor(.accentColor)
-                    .cornerRadius(4)
+                // View details button
+                HStack {
+                    Spacer()
+                    
+                    Text("View Details")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.blue)
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                }
             }
-            
-            Text(exercise.description)
-                .font(.body)
-                .foregroundColor(.secondary)
+            .padding()
+            .background(exercise.isCompleted ? Color.green.opacity(0.05) : Color.gray.opacity(0.05))
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(exercise.isCompleted ? Color.green.opacity(0.3) : Color.clear, lineWidth: 1)
+            )
+            .padding(.horizontal)
         }
-        .padding()
-        .background(Color.gray.opacity(0.05))
-        .cornerRadius(8)
-        .padding(.horizontal)
+        .buttonStyle(PlainButtonStyle())
     }
 }
 

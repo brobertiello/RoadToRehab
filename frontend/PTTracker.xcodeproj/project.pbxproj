@@ -21,6 +21,7 @@
 		4ECCFD081F5A8BFEA3C01BD2 /* UpdateSymptomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12B299C6B70978FA7CE8AF13 /* UpdateSymptomView.swift */; };
 		5A10161EC280B7FC1DA25754 /* ChatService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A567B2A7BB1BB710B7913A3 /* ChatService.swift */; };
 		5C5A79E8CB555E432CFF846C /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6511FCBCCB1480FEFA57F4B3 /* User.swift */; };
+		5F6FD0E1A0648D705772D7DF /* ExerciseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04541EDE21760B893731654C /* ExerciseDetailView.swift */; };
 		6275D2411EF633DB39EA8983 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCFB9BF366878660256DE47E /* KeychainHelper.swift */; };
 		76922F76F91658A1189642D7 /* RecoveryPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22E70AF8DD6CEA715A287371 /* RecoveryPlanViewModel.swift */; };
 		93D1E08512C83053129D8431 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818F5A60F7E4EB740A5C69AA /* ChatViewModel.swift */; };
@@ -34,6 +35,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		04541EDE21760B893731654C /* ExerciseDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseDetailView.swift; sourceTree = "<group>"; };
 		12B299C6B70978FA7CE8AF13 /* UpdateSymptomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateSymptomView.swift; sourceTree = "<group>"; };
 		150EEC725425D787CBAB4CA7 /* AddSymptomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSymptomView.swift; sourceTree = "<group>"; };
 		226018281B24DBA389E0273F /* RecoveryPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryPlanView.swift; sourceTree = "<group>"; };
@@ -90,6 +92,7 @@
 				481584D8F6536005F748C2F4 /* ChatView.swift */,
 				71C581786D6B1F0A1473133D /* ContentView.swift */,
 				550F80C780DB67AD24C13507 /* DashboardView.swift */,
+				04541EDE21760B893731654C /* ExerciseDetailView.swift */,
 				5BD553E772FA1ED3F1AA076E /* LandingView.swift */,
 				54792C0E233ABEF97C0D577E /* LoginView.swift */,
 				82A74C245D4B3B8C8B0FF903 /* ProfileView.swift */,
@@ -215,6 +218,7 @@
 				93D1E08512C83053129D8431 /* ChatViewModel.swift in Sources */,
 				41B2BC65D1231F9FDA56ADBF /* ContentView.swift in Sources */,
 				2CE8A8738A0DF36D14B95311 /* DashboardView.swift in Sources */,
+				5F6FD0E1A0648D705772D7DF /* ExerciseDetailView.swift in Sources */,
 				6275D2411EF633DB39EA8983 /* KeychainHelper.swift in Sources */,
 				B79D13AA39AFE7F86230883D /* LandingView.swift in Sources */,
 				F7397D114B776F603B7B0A19 /* LoginView.swift in Sources */,
