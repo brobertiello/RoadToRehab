@@ -196,7 +196,7 @@ npm install
 npm start
 ```
 
-The admin panel will be available at http://localhost:3002
+The admin panel will be available at http://localhost:3330
 
 ### Features
 
