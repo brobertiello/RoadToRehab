@@ -6,6 +6,27 @@ const exerciseSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  description: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  duration: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  difficulty: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 5
+  },
+  precautions: {
+    type: String,
+    required: true,
+    trim: true
+  },
   date: {
     type: Date,
     default: Date.now

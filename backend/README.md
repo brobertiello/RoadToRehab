@@ -26,9 +26,10 @@ npm install
 
 2. Create a `.env` file in the backend directory with the following variables:
 ```env
-PORT=3333
+PORT=your-server-port
 MONGODB_URI=mongodb://localhost:27017/pt-tracker
 JWT_SECRET=your-secret-key-here
+GEMINI_API_KEY=your-gemini-api-key-here
 ```
 
 3. Start the development server:
@@ -36,7 +37,7 @@ JWT_SECRET=your-secret-key-here
 npm run dev
 ```
 
-The server will start on http://localhost:3333
+The server will start on http://localhost:{PORT}
 
 ## Models
 

@@ -6,12 +6,14 @@ const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const symptomRoutes = require('./routes/symptomRoutes');
 const exerciseRoutes = require('./routes/exerciseRoutes');
+const geminiRoutes = require('./routes/geminiRoutes');
 
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static('admin'));
 
 // Add request logging middleware
 app.use((req, res, next) => {
@@ -39,6 +41,7 @@ app.use((req, res, next) => {
 app.use('/api/users', userRoutes);
 app.use('/api/symptoms', symptomRoutes);
 app.use('/api/exercises', exerciseRoutes);
+app.use('/api/gemini', geminiRoutes);
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)

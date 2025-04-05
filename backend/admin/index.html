@@ -20,7 +20,7 @@
         .form-group {
             margin-bottom: 10px;
         }
-        input, button {
+        input, button, textarea {
             padding: 8px;
             margin: 5px;
         }
@@ -36,6 +36,28 @@
         }
         .error {
             color: red;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
         }
     </style>
 </head>
@@ -55,44 +77,90 @@
         <div id="authResult" class="result"></div>
     </div>
 
-    <!-- Symptoms Section -->
-    <div class="section">
-        <h2>Symptoms</h2>
-        <div class="form-group">
-            <input type="text" id="bodyPart" placeholder="Body Part">
-            <button onclick="createSymptom()">Create Symptom</button>
-            <button onclick="getSymptoms()">Get All Symptoms</button>
-        </div>
-        <div class="form-group">
-            <input type="text" id="symptomId" placeholder="Symptom ID">
-            <button onclick="getSymptom()">Get Symptom</button>
-            <button onclick="updateSymptom()">Update Symptom</button>
-            <button onclick="deleteSymptom()">Delete Symptom</button>
-        </div>
-        <div id="symptomsResult" class="result"></div>
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('database')">Database Controls</div>
+        <div class="tab" onclick="switchTab('gemini')">Gemini Testing</div>
     </div>
 
-    <!-- Exercises Section -->
-    <div class="section">
-        <h2>Exercises</h2>
-        <div class="form-group">
-            <input type="text" id="exerciseType" placeholder="Exercise Type">
-            <input type="text" id="symptomIdForExercise" placeholder="Symptom ID">
-            <button onclick="createExercise()">Create Exercise</button>
-            <button onclick="getExercises()">Get All Exercises</button>
+    <!-- Database Controls Tab -->
+    <div id="database" class="tab-content active">
+        <!-- Symptoms Section -->
+        <div class="section">
+            <h2>Symptoms</h2>
+            <div class="form-group">
+                <input type="text" id="bodyPart" placeholder="Body Part">
+                <button onclick="createSymptom()">Create Symptom</button>
+                <button onclick="getSymptoms()">Get All Symptoms</button>
+            </div>
+            <div class="form-group">
+                <input type="text" id="symptomId" placeholder="Symptom ID">
+                <button onclick="getSymptom()">Get Symptom</button>
+                <button onclick="updateSymptom()">Update Symptom</button>
+                <button onclick="deleteSymptom()">Delete Symptom</button>
+            </div>
+            <div id="symptomsResult" class="result"></div>
         </div>
-        <div class="form-group">
-            <input type="text" id="exerciseId" placeholder="Exercise ID">
-            <button onclick="getExercise()">Get Exercise</button>
-            <button onclick="updateExercise()">Update Exercise</button>
-            <button onclick="deleteExercise()">Delete Exercise</button>
+
+        <!-- Exercises Section -->
+        <div class="section">
+            <h2>Exercises</h2>
+            <div class="form-group">
+                <input type="text" id="exerciseType" placeholder="Exercise Type">
+                <input type="text" id="symptomIdForExercise" placeholder="Symptom ID">
+                <button onclick="createExercise()">Create Exercise</button>
+                <button onclick="getExercises()">Get All Exercises</button>
+            </div>
+            <div class="form-group">
+                <input type="text" id="exerciseId" placeholder="Exercise ID">
+                <button onclick="getExercise()">Get Exercise</button>
+                <button onclick="updateExercise()">Update Exercise</button>
+                <button onclick="deleteExercise()">Delete Exercise</button>
+            </div>
+            <div id="exercisesResult" class="result"></div>
         </div>
-        <div id="exercisesResult" class="result"></div>
+    </div>
+
+    <!-- Gemini Testing Tab -->
+    <div id="gemini" class="tab-content">
+        <!-- Chat Testing Section -->
+        <div class="section">
+            <h2>Chatbot Testing</h2>
+            <div class="form-group">
+                <textarea id="chatMessage" rows="4" placeholder="Enter your message" style="width: 100%"></textarea>
+                <button onclick="testChat()">Send Message</button>
+            </div>
+            <div id="chatResult" class="result"></div>
+        </div>
+
+        <!-- Recovery Plan Testing Section -->
+        <div class="section">
+            <h2>Recovery Plan Generation</h2>
+            <div class="form-group">
+                <button onclick="generateRecoveryPlan()">Generate Recovery Plan</button>
+            </div>
+            <div id="recoveryPlanResult" class="result"></div>
+        </div>
     </div>
 
     <script>
         let token = '';
         const API_BASE = 'http://localhost:3333/api';
+
+        // Tab switching
+        function switchTab(tabId) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+        }
 
         // Helper function for API calls
         async function apiCall(endpoint, method = 'GET', body = null) {
@@ -190,8 +258,7 @@
         async function updateExercise() {
             const id = document.getElementById('exerciseId').value;
             const exerciseType = document.getElementById('exerciseType').value;
-            const completed = document.getElementById('completed').checked;
-            const { data } = await apiCall(`/exercises/${id}`, 'PATCH', { exerciseType, completed });
+            const { data } = await apiCall(`/exercises/${id}`, 'PATCH', { exerciseType });
             document.getElementById('exercisesResult').textContent = JSON.stringify(data, null, 2);
         }
 
@@ -199,6 +266,18 @@
             const id = document.getElementById('exerciseId').value;
             const { data } = await apiCall(`/exercises/${id}`, 'DELETE');
             document.getElementById('exercisesResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        // Gemini API functions
+        async function testChat() {
+            const message = document.getElementById('chatMessage').value;
+            const { data } = await apiCall('/gemini/chat', 'POST', { message });
+            document.getElementById('chatResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function generateRecoveryPlan() {
+            const { data } = await apiCall('/gemini/recovery-plan', 'POST');
+            document.getElementById('recoveryPlanResult').textContent = JSON.stringify(data, null, 2);
         }
     </script>
 </body>
