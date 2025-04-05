@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PT Tracker Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>PT Tracker Admin Panel</h1>
+
+    <!-- Authentication Section -->
+    <div class="section">
+        <h2>Authentication</h2>
+        <div class="form-group">
+            <input type="text" id="name" placeholder="Name">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="register()">Register</button>
+            <button onclick="login()">Login</button>
+        </div>
+        <div id="authResult" class="result"></div>
+    </div>
+
+    <!-- Symptoms Section -->
+    <div class="section">
+        <h2>Symptoms</h2>
+        <div class="form-group">
+            <input type="text" id="bodyPart" placeholder="Body Part">
+            <button onclick="createSymptom()">Create Symptom</button>
+            <button onclick="getSymptoms()">Get All Symptoms</button>
+        </div>
+        <div class="form-group">
+            <input type="text" id="symptomId" placeholder="Symptom ID">
+            <button onclick="getSymptom()">Get Symptom</button>
+            <button onclick="updateSymptom()">Update Symptom</button>
+            <button onclick="deleteSymptom()">Delete Symptom</button>
+        </div>
+        <div id="symptomsResult" class="result"></div>
+    </div>
+
+    <!-- Exercises Section -->
+    <div class="section">
+        <h2>Exercises</h2>
+        <div class="form-group">
+            <input type="text" id="exerciseType" placeholder="Exercise Type">
+            <input type="text" id="symptomIdForExercise" placeholder="Symptom ID">
+            <button onclick="createExercise()">Create Exercise</button>
+            <button onclick="getExercises()">Get All Exercises</button>
+        </div>
+        <div class="form-group">
+            <input type="text" id="exerciseId" placeholder="Exercise ID">
+            <button onclick="getExercise()">Get Exercise</button>
+            <button onclick="updateExercise()">Update Exercise</button>
+            <button onclick="deleteExercise()">Delete Exercise</button>
+        </div>
+        <div id="exercisesResult" class="result"></div>
+    </div>
+
+    <script>
+        let token = '';
+        const API_BASE = 'http://localhost:3333/api';
+
+        // Helper function for API calls
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method,
+                    headers,
+                    body: body ? JSON.stringify(body) : null
+                });
+                const data = await response.json();
+                return { data, status: response.status };
+            } catch (error) {
+                return { error: error.message, status: 500 };
+            }
+        }
+
+        // Authentication functions
+        async function register() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const { data, status } = await apiCall('/users/register', 'POST', { name, email, password });
+            document.getElementById('authResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const { data, status } = await apiCall('/users/login', 'POST', { email, password });
+            if (data.token) {
+                token = data.token;
+            }
+            document.getElementById('authResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        // Symptom functions
+        async function createSymptom() {
+            const bodyPart = document.getElementById('bodyPart').value;
+            const { data } = await apiCall('/symptoms', 'POST', { bodyPart });
+            document.getElementById('symptomsResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function getSymptoms() {
+            const { data } = await apiCall('/symptoms');
+            document.getElementById('symptomsResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function getSymptom() {
+            const id = document.getElementById('symptomId').value;
+            const { data } = await apiCall(`/symptoms/${id}`);
+            document.getElementById('symptomsResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function updateSymptom() {
+            const id = document.getElementById('symptomId').value;
+            const bodyPart = document.getElementById('bodyPart').value;
+            const { data } = await apiCall(`/symptoms/${id}`, 'PATCH', { bodyPart });
+            document.getElementById('symptomsResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function deleteSymptom() {
+            const id = document.getElementById('symptomId').value;
+            const { data } = await apiCall(`/symptoms/${id}`, 'DELETE');
+            document.getElementById('symptomsResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        // Exercise functions
+        async function createExercise() {
+            const exerciseType = document.getElementById('exerciseType').value;
+            const symptomId = document.getElementById('symptomIdForExercise').value;
+            const { data } = await apiCall('/exercises', 'POST', { exerciseType, symptom: symptomId });
+            document.getElementById('exercisesResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function getExercises() {
+            const { data } = await apiCall('/exercises');
+            document.getElementById('exercisesResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function getExercise() {
+            const id = document.getElementById('exerciseId').value;
+            const { data } = await apiCall(`/exercises/${id}`);
+            document.getElementById('exercisesResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function updateExercise() {
+            const id = document.getElementById('exerciseId').value;
+            const exerciseType = document.getElementById('exerciseType').value;
+            const completed = document.getElementById('completed').checked;
+            const { data } = await apiCall(`/exercises/${id}`, 'PATCH', { exerciseType, completed });
+            document.getElementById('exercisesResult').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function deleteExercise() {
+            const id = document.getElementById('exerciseId').value;
+            const { data } = await apiCall(`/exercises/${id}`, 'DELETE');
+            document.getElementById('exercisesResult').textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html> 
