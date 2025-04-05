@@ -7,6 +7,48 @@ class AuthManager: ObservableObject {
     @Published var authToken: String?
     
     private let baseURL = "http://localhost:3001/api"
+    private let keychainHelper = KeychainHelper.standard
+    private let accountKey = "PTTracker" // Generic account name for keychain
+    
+    init() {
+        // Try to restore session from keychain on initialization
+        restoreSession()
+    }
+    
+    private func restoreSession() {
+        // Try to get token from keychain
+        if let token = keychainHelper.getToken(account: accountKey) {
+            self.authToken = token
+            
+            // Try to get user data from keychain
+            if let userData = keychainHelper.getUserData(account: accountKey) {
+                do {
+                    let user = try JSONDecoder().decode(User.self, from: userData)
+                    self.currentUser = user
+                    self.isAuthenticated = true
+                    print("Session restored for user: \(user.name)")
+                } catch {
+                    print("Failed to decode saved user data: \(error)")
+                    // Clear invalid data
+                    keychainHelper.clearAuthData(account: accountKey)
+                }
+            }
+        }
+    }
+    
+    private func saveSession(user: User, token: String) {
+        // Save token to keychain
+        keychainHelper.saveToken(token, account: accountKey)
+        
+        // Save user data to keychain
+        do {
+            let userData = try JSONEncoder().encode(user)
+            keychainHelper.saveUser(userData, account: accountKey)
+            print("Session saved for user: \(user.name)")
+        } catch {
+            print("Failed to encode user data: \(error)")
+        }
+    }
     
     func register(name: String, email: String, password: String) async throws -> Bool {
         print("Attempting to register user: \(email)")
@@ -61,6 +103,10 @@ class AuthManager: ObservableObject {
                 self.authToken = authResponse.token
                 self.isAuthenticated = true
             }
+            
+            // Save session data to keychain
+            saveSession(user: authResponse.user, token: authResponse.token)
+            
             print("Registration successful for user: \(authResponse.user.name)")
             return true
         } catch {
@@ -86,6 +132,10 @@ class AuthManager: ObservableObject {
                     self.authToken = token
                     self.isAuthenticated = true
                 }
+                
+                // Save session data to keychain
+                saveSession(user: user, token: token)
+                
                 print("Registration successful with manual JSON parsing for user: \(name)")
                 return true
             }
@@ -146,6 +196,10 @@ class AuthManager: ObservableObject {
                 self.authToken = authResponse.token
                 self.isAuthenticated = true
             }
+            
+            // Save session data to keychain
+            saveSession(user: authResponse.user, token: authResponse.token)
+            
             print("Login successful for user: \(authResponse.user.name)")
             return true
         } catch {
@@ -171,6 +225,10 @@ class AuthManager: ObservableObject {
                     self.authToken = token
                     self.isAuthenticated = true
                 }
+                
+                // Save session data to keychain
+                saveSession(user: user, token: token)
+                
                 print("Login successful with manual JSON parsing for user: \(name)")
                 return true
             }
@@ -180,10 +238,14 @@ class AuthManager: ObservableObject {
     }
     
     func logout() {
+        // Clear keychain data
+        keychainHelper.clearAuthData(account: accountKey)
+        
         DispatchQueue.main.async {
             self.currentUser = nil
             self.authToken = nil
             self.isAuthenticated = false
+            print("User logged out successfully")
         }
     }
 }
