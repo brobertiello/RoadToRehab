@@ -1,6 +1,82 @@
-# Physical Therapy Home Exercise Tracker
+# PT Tracker
 
-The Physical Therapy Home Exercise Tracker is a web and mobile application designed to empower users in managing their recovery with personalized physical therapy plans. Users can indicate painful or discomforted body parts via an interactive body outline, receive tailored exercise routines and recovery schedules, track their form in real time using a webcam component, and ask questions through an AI-powered chatbot.
+A comprehensive Physical Therapy Tracking application that helps users monitor their recovery journey.
+
+## Project Structure
+
+This project consists of three main components:
+
+1. **Backend** - A Node.js/Express MongoDB API for data storage and retrieval
+2. **Frontend** - A Swift iOS app for tracking symptoms and physical therapy progress
+3. **PoseDetection** - A Swift app that uses the device camera to detect human body poses
+
+## Backend (MongoDB & Express.js)
+
+The backend handles:
+
+- User authentication (registration, login)
+- Symptom tracking (create, read, update, delete)
+- Exercise management
+
+To run the backend:
+
+```bash
+cd backend
+npm install
+node src/index.js
+```
+
+The server will run on port 3001.
+
+## Frontend (Swift iOS App)
+
+The iOS app provides:
+
+- User registration and login with persistent authentication
+- Dashboard with tabs for Profile, Symptoms, Recovery Plan, and Settings
+- Symptom tracking with selectable body parts and pain levels
+- Clean, intuitive user interface
+
+To run the frontend:
+
+```bash
+cd frontend
+open PTTracker.xcodeproj
+```
+
+Then build and run the app in Xcode.
+
+## PoseDetection (Swift Camera App)
+
+A separate Swift app that:
+
+- Uses the device camera
+- Detects human body positioning
+- Analyzes physical therapy poses
+
+## Setup Instructions
+
+1. Clone this repository
+2. Start the backend server:
+   ```
+   cd backend
+   npm install
+   node src/index.js
+   ```
+3. Open the frontend app in Xcode:
+   ```
+   cd frontend
+   open PTTracker.xcodeproj
+   ```
+4. Build and run the app on a simulator or device
+
+## Features
+
+- **User Authentication**: Register and login functionality with secure token storage
+- **Symptom Tracking**: Record and monitor symptoms by body part and severity
+- **Persistent Authentication**: Stay logged in even after app restarts
+- **Profile Management**: View and manage user information
+- **Clean UI**: Intuitive interface for easy navigation and data entry
 
 ---
 
