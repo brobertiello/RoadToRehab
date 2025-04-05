@@ -13,6 +13,28 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  if (req.body && Object.keys(req.body).length > 0) {
+    // Log request body but mask password
+    const logBody = {...req.body};
+    if (logBody.password) logBody.password = '********';
+    console.log('Request Body:', JSON.stringify(logBody));
+  }
+  
+  // Capture the original send function
+  const originalSend = res.send;
+  
+  // Override the send function
+  res.send = function(body) {
+    console.log(`[${new Date().toISOString()}] Response:`, typeof body === 'object' ? JSON.stringify(body) : body);
+    return originalSend.apply(this, arguments);
+  };
+  
+  next();
+});
+
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/symptoms', symptomRoutes);

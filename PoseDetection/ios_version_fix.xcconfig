@@ -1,0 +1,7 @@
+// iOS compatibility configuration for iPhone 13
+IPHONEOS_DEPLOYMENT_TARGET = 16.0
+ARCHS = $(ARCHS_STANDARD)
+VALID_ARCHS = arm64
+TARGETED_DEVICE_FAMILY = 1
+SUPPORTED_PLATFORMS = iphoneos iphonesimulator
+SWIFT_VERSION = 5.0

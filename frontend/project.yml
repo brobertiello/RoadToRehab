@@ -1,0 +1,27 @@
+name: PTTracker
+options:
+  bundleIdPrefix: com.pttracker
+  deploymentTarget:
+    iOS: 15.0
+targets:
+  PTTracker:
+    type: application
+    platform: iOS
+    sources:
+      - path: PTTracker
+        excludes:
+          - "**/Info.plist" # Exclude our manually created Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.pttracker.app
+    info:
+      path: generated_plists/Info.plist # XcodeGen still needs a path, but we'll generate this file
+      properties:
+        CFBundleDisplayName: "PT Tracker"
+        UILaunchStoryboardName: LaunchScreen
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+          NSExceptionDomains:
+            localhost:
+              NSExceptionAllowsInsecureHTTPLoads: true
+              NSIncludesSubdomains: true 
