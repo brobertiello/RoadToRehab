@@ -9,7 +9,7 @@ class AuthManager: ObservableObject {
     @Published var currentUser: User?
     @Published var authToken: String?
     
-    private let baseURL = "http://localhost:3001/api"
+    private let baseURL = "https://roadtorehab-f3497696e3ef.herokuapp.com/api"
     private let keychainHelper = KeychainHelper.standard
     private let accountKey = "PTTracker" // Generic account name for keychain
     

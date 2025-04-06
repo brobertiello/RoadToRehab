@@ -10,7 +10,7 @@ class DatabaseConfigService: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
-    private let baseURL = "http://localhost:3001/api/db-config"
+    private let baseURL = "https://roadtorehab-f3497696e3ef.herokuapp.com/api/db-config"
     private let authManager = AuthManager.shared
     
     // Get MongoDB connection status

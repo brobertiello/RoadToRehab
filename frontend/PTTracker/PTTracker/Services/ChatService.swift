@@ -1,7 +1,7 @@
 import Foundation
 
 class ChatService {
-    private let baseURL = "http://localhost:3001/api/gemini"
+    private let baseURL = "https://roadtorehab-f3497696e3ef.herokuapp.com/api/gemini"
     private let authManager: AuthManager
     
     init(authManager: AuthManager) {
