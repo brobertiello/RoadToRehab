@@ -65,18 +65,21 @@ struct Severity: Codable, Identifiable {
 struct Symptom: Codable, Identifiable {
     let id: String
     var bodyPart: String
+    var notes: String?
     var severities: [Severity]
     
     enum CodingKeys: String, CodingKey {
         case id = "_id"
         case bodyPart
+        case notes
         case severities
     }
     
     // For creating a new symptom locally
-    init(bodyPart: String, severity: Int) {
+    init(bodyPart: String, severity: Int, notes: String? = nil) {
         self.id = UUID().uuidString  // Temporary ID until saved to DB
         self.bodyPart = bodyPart
+        self.notes = notes
         self.severities = [
             Severity(value: severity, date: Date())
         ]

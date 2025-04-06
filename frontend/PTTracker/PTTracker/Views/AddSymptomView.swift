@@ -9,6 +9,7 @@ struct AddSymptomView: View {
     
     @State private var selectedBodyPart = "Neck"
     @State private var severity = 5
+    @State private var notes = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
     
@@ -34,6 +35,13 @@ struct AddSymptomView: View {
                             Text("10")
                         }
                     }
+                }
+                
+                Section(header: Text("Additional Notes (Optional)")) {
+                    TextField("Describe your symptoms...", text: $notes)
+                    Text("Add details about your symptoms that might help with recovery planning")
+                        .font(.caption)
+                        .foregroundColor(.gray)
                 }
                 
                 if let errorMessage = errorMessage {
@@ -72,9 +80,13 @@ struct AddSymptomView: View {
         isLoading = true
         errorMessage = nil
         
+        // Trim notes and set to nil if empty
+        let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        let notesToSend = trimmedNotes.isEmpty ? nil : trimmedNotes
+        
         Task {
             do {
-                try await viewModel.addSymptom(bodyPart: selectedBodyPart, severity: severity)
+                try await viewModel.addSymptom(bodyPart: selectedBodyPart, severity: severity, notes: notesToSend)
                 DispatchQueue.main.async {
                     isLoading = false
                     dismiss()

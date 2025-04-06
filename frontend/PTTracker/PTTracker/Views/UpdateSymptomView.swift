@@ -6,6 +6,7 @@ struct UpdateSymptomView: View {
     let symptom: Symptom
     
     @State private var severity: Int
+    @State private var notes: String
     @State private var isLoading = false
     @State private var errorMessage: String?
     
@@ -13,6 +14,7 @@ struct UpdateSymptomView: View {
         self.viewModel = viewModel
         self.symptom = symptom
         self._severity = State(initialValue: symptom.currentSeverity)
+        self._notes = State(initialValue: symptom.notes ?? "")
     }
     
     var body: some View {
@@ -42,6 +44,13 @@ struct UpdateSymptomView: View {
                         }
                     }
                     .padding(.vertical)
+                }
+                
+                Section(header: Text("Additional Notes (Optional)")) {
+                    TextField("Describe your symptoms...", text: $notes)
+                    Text("Add details about your symptoms that might help with recovery planning")
+                        .font(.caption)
+                        .foregroundColor(.gray)
                 }
                 
                 if let errorMessage = errorMessage {
@@ -80,9 +89,13 @@ struct UpdateSymptomView: View {
         isLoading = true
         errorMessage = nil
         
+        // Trim notes and set to nil if empty
+        let trimmedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        let notesToSend = trimmedNotes.isEmpty ? nil : trimmedNotes
+        
         Task {
             do {
-                try await viewModel.updateSymptom(symptomId: symptom.id, severity: severity)
+                try await viewModel.updateSymptom(symptomId: symptom.id, severity: severity, notes: notesToSend)
                 DispatchQueue.main.async {
                     isLoading = false
                     dismiss()
