@@ -1,13 +1,17 @@
 # PT Tracker Backend
 
-This is the backend server for the Physical Therapy Home Exercise Tracker application. It provides a RESTful API for user authentication, symptom tracking, and exercise management.
+This is the backend server for the Physical Therapy Tracker application. It provides a RESTful API for user authentication, symptom tracking, and exercise management.
 
 ## Table of Contents
 
 - [Setup](#setup)
+- [Environment Variables](#environment-variables)
+- [API Documentation](#api-documentation)
 - [Models](#models)
-- [API Routes](#api-routes)
+- [Security](#security)
+- [Error Handling](#error-handling)
 - [Admin Panel](#admin-panel)
+- [Development](#development)
 
 ## Setup
 
@@ -26,10 +30,10 @@ npm install
 
 2. Create a `.env` file in the backend directory with the following variables:
 ```env
-PORT=your-server-port
-MONGODB_URI=mongodb://localhost:27017/pt-tracker
-JWT_SECRET=your-secret-key-here
-GEMINI_API_KEY=your-gemini-api-key-here
+PORT=3001
+MONGODB_URI=your_mongodb_uri
+JWT_SECRET=your_jwt_secret
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 3. Start the development server:
@@ -37,47 +41,16 @@ GEMINI_API_KEY=your-gemini-api-key-here
 npm run dev
 ```
 
-The server will start on http://localhost:{PORT}
+The server will start on http://localhost:3001 (or your specified PORT)
 
-## Models
+## Environment Variables
 
-### User
-```javascript
-{
-  name: String,
-  email: String,
-  password: String (hashed),
-  dateJoined: Date,
-  lastLogin: Date,
-  symptoms: [Symptom]
-}
-```
+- `PORT`: Server port number (default: 3001)
+- `MONGODB_URI`: MongoDB connection string
+- `JWT_SECRET`: Secret key for JWT token generation
+- `GEMINI_API_KEY`: API key for Gemini AI integration
 
-### Symptom
-```javascript
-{
-  bodyPart: String,
-  severities: [{
-    value: Number (0-10),
-    date: Date
-  }],
-  exercises: [Exercise],
-  user: User
-}
-```
-
-### Exercise
-```javascript
-{
-  exerciseType: String,
-  date: Date,
-  completed: Boolean,
-  symptom: Symptom,
-  user: User
-}
-```
-
-## API Routes
+## API Documentation
 
 ### Authentication
 
@@ -91,6 +64,7 @@ The server will start on http://localhost:{PORT}
   "password": "string"
 }
 ```
+- **Response:** User object with JWT token
 
 #### Login
 - **POST** `/api/users/login`
@@ -101,10 +75,12 @@ The server will start on http://localhost:{PORT}
   "password": "string"
 }
 ```
+- **Response:** User object with JWT token
 
 #### Get Current User
 - **GET** `/api/users/me`
 - **Headers:** `Authorization: Bearer <token>`
+- **Response:** Current user object
 
 ### Symptoms
 
@@ -114,13 +90,21 @@ The server will start on http://localhost:{PORT}
 - **Body:**
 ```json
 {
-  "bodyPart": "string"
+  "bodyPart": "string",
+  "severity": {
+    "value": number,
+    "date": "string"
+  }
 }
 ```
 
 #### Get All Symptoms
 - **GET** `/api/symptoms`
 - **Headers:** `Authorization: Bearer <token>`
+- **Query Parameters:**
+  - `sort`: Sort order (asc/desc)
+  - `limit`: Number of results
+  - `page`: Page number
 
 #### Get Single Symptom
 - **GET** `/api/symptoms/:id`
@@ -132,7 +116,11 @@ The server will start on http://localhost:{PORT}
 - **Body:**
 ```json
 {
-  "bodyPart": "string"
+  "bodyPart": "string",
+  "severity": {
+    "value": number,
+    "date": "string"
+  }
 }
 ```
 
@@ -148,14 +136,21 @@ The server will start on http://localhost:{PORT}
 - **Body:**
 ```json
 {
-  "exerciseType": "string",
-  "symptom": "symptom_id"
+  "name": "string",
+  "description": "string",
+  "sets": number,
+  "reps": number,
+  "symptomId": "string"
 }
 ```
 
 #### Get All Exercises
 - **GET** `/api/exercises`
 - **Headers:** `Authorization: Bearer <token>`
+- **Query Parameters:**
+  - `sort`: Sort order (asc/desc)
+  - `limit`: Number of results
+  - `page`: Page number
 
 #### Get Single Exercise
 - **GET** `/api/exercises/:id`
@@ -167,7 +162,10 @@ The server will start on http://localhost:{PORT}
 - **Body:**
 ```json
 {
-  "exerciseType": "string",
+  "name": "string",
+  "description": "string",
+  "sets": number,
+  "reps": number,
   "completed": boolean
 }
 ```
@@ -176,13 +174,85 @@ The server will start on http://localhost:{PORT}
 - **DELETE** `/api/exercises/:id`
 - **Headers:** `Authorization: Bearer <token>`
 
+## Models
+
+### User
+```typescript
+{
+  name: string;
+  email: string;
+  password: string; // hashed
+  dateJoined: Date;
+  lastLogin: Date;
+  symptoms: Symptom[];
+}
+```
+
+### Symptom
+```typescript
+{
+  bodyPart: string;
+  severities: {
+    value: number; // 0-10
+    date: Date;
+  }[];
+  exercises: Exercise[];
+  user: User;
+}
+```
+
+### Exercise
+```typescript
+{
+  name: string;
+  description: string;
+  sets: number;
+  reps: number;
+  completed: boolean;
+  symptom: Symptom;
+  user: User;
+}
+```
+
+## Security
+
+- Password hashing using bcrypt
+- JWT-based authentication
+- Protected routes with middleware
+- Input validation and sanitization
+- Rate limiting on authentication routes
+- CORS configuration
+- HTTP headers security
+- MongoDB injection prevention
+
+## Error Handling
+
+All API endpoints return appropriate HTTP status codes:
+
+- 200: Success
+- 201: Created
+- 400: Bad Request
+- 401: Unauthorized
+- 403: Forbidden
+- 404: Not Found
+- 500: Server Error
+
+Error responses follow this format:
+```json
+{
+  "error": {
+    "message": "Error description",
+    "code": "ERROR_CODE"
+  }
+}
+```
+
 ## Admin Panel
 
-The backend includes a simple admin panel for testing the API endpoints.
+The backend includes an admin panel for API testing and management:
 
 ### Setup
-
-1. Navigate to the admin directory:
+1. Navigate to admin directory:
 ```bash
 cd admin
 ```
@@ -192,43 +262,34 @@ cd admin
 npm install
 ```
 
-3. Start the admin panel:
+3. Start admin panel:
 ```bash
 npm start
 ```
 
-The admin panel will be available at http://localhost:3330
+Access the panel at http://localhost:3330
 
 ### Features
-
-- User registration and login
-- CRUD operations for symptoms
-- CRUD operations for exercises
-- Real-time API response display
+- User management
+- Symptom tracking overview
+- Exercise management
+- API testing interface
+- Real-time response monitoring
 - JWT token management
 
-## Error Handling
+## Development
 
-The API returns appropriate HTTP status codes and error messages:
+### Scripts
+- `npm run dev`: Start development server with hot reload
+- `npm start`: Start production server
+- `npm test`: Run tests
+- `npm run lint`: Run linter
+- `npm run build`: Build for production
 
-- 200: Success
-- 201: Created
-- 400: Bad Request
-- 401: Unauthorized
-- 404: Not Found
-- 500: Server Error
-
-Error responses follow this format:
-```json
-{
-  "error": "Error message"
-}
-```
-
-## Security
-
-- Passwords are hashed using bcrypt
-- JWT tokens are used for authentication
-- Protected routes require valid JWT token
-- Input validation for email and password
-- CORS enabled for development 
+### Best Practices
+1. Follow Node.js and Express best practices
+2. Write clear documentation
+3. Use TypeScript for type safety
+4. Implement proper error handling
+5. Write unit tests
+6. Follow security guidelines 

@@ -4,11 +4,10 @@ A comprehensive Physical Therapy Tracking application that helps users monitor t
 
 ## Project Structure
 
-This project consists of three main components:
+This project consists of two main components:
 
 1. **Backend** - A Node.js/Express MongoDB API for data storage and retrieval
 2. **Frontend** - A Swift iOS app for tracking symptoms and physical therapy progress
-3. **PoseDetection** - A Swift app that uses the device camera to detect human body poses
 
 ## Backend (MongoDB & Express.js)
 
@@ -17,24 +16,26 @@ The backend handles:
 - User authentication (registration, login)
 - Symptom tracking (create, read, update, delete)
 - Exercise management
+- Admin panel for testing and management
 
 To run the backend:
 
 ```bash
 cd backend
 npm install
-node src/index.js
+npm run dev
 ```
 
-The server will run on port 3001.
+The server will run on the port specified in your `.env` file (default: 3001).
 
 ## Frontend (Swift iOS App)
 
 The iOS app provides:
 
-- User registration and login with persistent authentication
+- User registration and login with persistent authentication using iOS Keychain
 - Dashboard with tabs for Profile, Symptoms, Recovery Plan, and Settings
 - Symptom tracking with selectable body parts and pain levels
+- Offline capability with local data caching
 - Clean, intuitive user interface
 
 To run the frontend:
@@ -46,37 +47,72 @@ open PTTracker.xcodeproj
 
 Then build and run the app in Xcode.
 
-## PoseDetection (Swift Camera App)
-
-A separate Swift app that:
-
-- Uses the device camera
-- Detects human body positioning
-- Analyzes physical therapy poses
-
 ## Setup Instructions
 
 1. Clone this repository
-2. Start the backend server:
-   ```
+
+2. Set up the backend:
+   ```bash
    cd backend
    npm install
-   node src/index.js
    ```
-3. Open the frontend app in Xcode:
+   Create a `.env` file with:
    ```
+   PORT=3001
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_secret_key
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
+   Start the server:
+   ```bash
+   npm run dev
+   ```
+
+3. Set up the frontend:
+   ```bash
    cd frontend
    open PTTracker.xcodeproj
    ```
-4. Build and run the app on a simulator or device
+   Build and run the app in Xcode
 
 ## Features
 
-- **User Authentication**: Register and login functionality with secure token storage
+### Backend Features
+- **User Authentication**: Secure registration and login with JWT tokens
+- **Symptom Management**: Full CRUD operations for symptoms
+- **Exercise Tracking**: Create and manage exercise routines
+- **Admin Panel**: Testing interface for API endpoints
+- **Security**: Password hashing, JWT authentication, and proper error handling
+
+### Frontend Features
+- **User Authentication**: Register and login with persistent Keychain storage
 - **Symptom Tracking**: Record and monitor symptoms by body part and severity
-- **Persistent Authentication**: Stay logged in even after app restarts
+- **Data Synchronization**: Real-time sync with backend
+- **Offline Support**: Local data caching
 - **Profile Management**: View and manage user information
-- **Clean UI**: Intuitive interface for easy navigation and data entry
+- **Modern UI**: Intuitive interface with proper iOS design guidelines
+
+## Prerequisites
+
+### Backend Requirements
+- Node.js v14 or higher
+- MongoDB (local or Atlas)
+- npm or yarn
+
+### Frontend Requirements
+- Xcode 13.0+
+- iOS 15.0+
+- Swift 5.5+
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+1. Fork the repository
+2. Create a new branch for your feature or bug fix
+3. Commit your changes and push to your branch
+4. Open a pull request detailing your changes
+
+Ensure your contributions adhere to the project's coding standards and include appropriate documentation.
 
 ---
 
@@ -90,7 +126,6 @@ A separate Swift app that:
   - [Frontend Setup](#frontend-setup)
 - [Project Structure](#project-structure)
 - [Future Features](#future-features)
-- [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
 
@@ -154,12 +189,13 @@ Follow these steps to set up the development environment.
    ```env
    PORT=3001
    MONGODB_URI=your_mongodb_connection_string
-   API_KEY=your_api_key_here
+   JWT_SECRET=your_secret_key
+   GEMINI_API_KEY=your_gemini_api_key
    ```
    
 4. **Start the Backend Server:**
    ```bash
-   npm start
+   npm run dev
    ```
    The backend server will be running at [http://localhost:3001](http://localhost:3001).
 
@@ -235,12 +271,12 @@ physical-therapy-home-exercise-tracker/
 
 ---
 
-## Contributing
+## License
 
-Contributions are welcome! Please follow these steps:
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Commit your changes and push to your branch.
-4. Open a pull request detailing your changes.
+This project is licensed under the MIT License.
 
-Ensure your contributions adhere to the project's coding standards and include appropriate documentation.
+## Contact
+
+For any questions or further information, please contact:
+
+- [Your Name](mailto:your.email@example.com)

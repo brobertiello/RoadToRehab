@@ -6,13 +6,13 @@ This is the frontend iOS application for PT Tracker, which allows users to track
 
 - **User Authentication**
   - Registration and login functionality
-  - Persistent authentication using iOS Keychain
+  - Secure token storage using iOS Keychain
   - Automatic session restoration on app restart
   
 - **Dashboard with Multiple Tabs**
-  - Profile: View user information
+  - Profile: View and manage user information
   - Symptoms: Track and manage pain symptoms
-  - Recovery Plan: View personalized recovery plans (placeholder for future functionality)
+  - Recovery Plan: View personalized recovery plans
   - Settings: Configure app preferences and logout
 
 - **Symptom Tracking**
@@ -22,28 +22,29 @@ This is the frontend iOS application for PT Tracker, which allows users to track
   - Delete symptoms when resolved
   - Visual representation of pain levels with color-coded indicators
 
-- **Backend Integration**
+- **Data Management**
   - Real-time synchronization with MongoDB backend
-  - Secure API communication with token authentication
+  - Secure API communication with JWT authentication
   - Offline capability with local data caching
+  - Automatic retry for failed network requests
 
 ## Prerequisites
 
 - Xcode 13.0+
 - iOS 15.0+
 - Swift 5.5+
-- Running backend server on port 3001
+- Running backend server (default port: 3001)
 
 ## Setup Instructions
 
 1. Ensure the backend server is running:
-   ```
+   ```bash
    cd ../backend
-   node src/index.js
+   npm run dev
    ```
 
 2. Open the Xcode project:
-   ```
+   ```bash
    cd frontend
    open PTTracker.xcodeproj
    ```
@@ -52,41 +53,72 @@ This is the frontend iOS application for PT Tracker, which allows users to track
 
 ## Project Structure
 
-- **Views**: User interface components
-  - `LandingView`: Initial view with login and register buttons
-  - `LoginView`: Login form
-  - `RegisterView`: Registration form
-  - `DashboardView`: Main app container with tab navigation
-  - `ProfileView`: Shows user information
-  - `SymptomsView`: Lists user's symptoms and allows management
-  - `AddSymptomView`: Form to add new symptoms
-  - `UpdateSymptomView`: Form to update symptom severity
-  - `RecoveryPlanView`: Placeholder for future functionality
-  - `SettingsView`: App settings and logout
+- **Views**
+  - `LandingView`: Initial view with login and register options
+  - `LoginView`: User authentication form
+  - `RegisterView`: New user registration form
+  - `DashboardView`: Main tabbed interface
+  - `ProfileView`: User profile management
+  - `SymptomsView`: Symptom tracking and management
+  - `AddSymptomView`: New symptom entry form
+  - `UpdateSymptomView`: Symptom severity update form
+  - `RecoveryPlanView`: Exercise and recovery tracking
+  - `SettingsView`: App configuration and user preferences
 
-- **Models**: Data structures
-  - `User`: User model matching backend schema
-  - `Symptom`: Symptom model with severity tracking
-  - `Severity`: Model for tracking pain severity over time
+- **Models**
+  - `User`: User profile and authentication data
+  - `Symptom`: Symptom tracking information
+  - `Severity`: Pain level tracking over time
+  - `Exercise`: Exercise tracking and management
 
-- **Services**: Backend connection
-  - `AuthManager`: Handles authentication with persistent tokens
-  - `SymptomService`: API calls for symptom management
+- **ViewModels**
+  - `AuthViewModel`: Authentication state management
+  - `SymptomsViewModel`: Symptom data operations
+  - `ProfileViewModel`: User profile management
+  - `RecoveryViewModel`: Exercise and recovery tracking
 
-- **ViewModels**: Business logic
-  - `SymptomsViewModel`: Manages symptom data and operations
+- **Services**
+  - `AuthManager`: JWT token and authentication handling
+  - `APIService`: Backend API communication
+  - `KeychainService`: Secure data storage
+  - `CacheManager`: Local data caching
 
-- **Utils**: Helper utilities
-  - `KeychainHelper`: Secure storage for authentication data
-  - `NetworkUtils`: Network configuration helpers
+- **Utils**
+  - `KeychainHelper`: Secure storage utilities
+  - `NetworkUtils`: API configuration and networking
+  - `DateFormatter`: Date handling utilities
+  - `ValidationUtils`: Input validation helpers
 
-## Security
+## Security Features
 
-The app implements several security features:
-- Secure storage of authentication tokens in iOS Keychain
-- Token-based API authentication
-- Proper error handling and validation
+- Secure storage of JWT tokens in iOS Keychain
+- HTTPS communication with backend
+- Input validation and sanitization
+- Proper error handling and user feedback
+- Automatic token refresh mechanism
+- Secure password handling
 
-## Backend Connection
+## Error Handling
 
-The app connects to the Node.js backend running on `http://localhost:3001`. For development purposes, the app allows insecure HTTP connections to localhost. 
+The app implements comprehensive error handling:
+- Network connectivity issues
+- Authentication failures
+- API errors
+- Data validation errors
+- Offline mode fallback
+
+## Development Guidelines
+
+1. Follow Swift style guide and best practices
+2. Use SwiftUI previews for UI development
+3. Implement proper error handling
+4. Write clear documentation
+5. Test thoroughly before submitting PRs
+
+## Testing
+
+The app includes:
+- Unit tests for business logic
+- UI tests for critical user flows
+- Network mocking for API tests
+- Keychain interaction tests 
