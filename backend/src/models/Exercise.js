@@ -1,52 +1,56 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const exerciseSchema = new mongoose.Schema({
   exerciseType: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   description: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   duration: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   difficulty: {
     type: Number,
     required: true,
     min: 1,
-    max: 5
+    max: 5,
   },
   precautions: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
   },
   date: {
     type: Date,
-    default: Date.now
+    default: Date.now,
+  },
+  scheduledDate: {
+    type: Date,
+    default: null,
   },
   completed: {
     type: Boolean,
-    default: false
+    default: false,
   },
   symptom: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Symptom',
-    required: true
+    ref: "Symptom",
+    required: true,
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  }
+    ref: "User",
+    required: true,
+  },
 });
 
-const Exercise = mongoose.model('Exercise', exerciseSchema);
+const Exercise = mongoose.model("Exercise", exerciseSchema);
 
-module.exports = Exercise; 
+module.exports = Exercise;
