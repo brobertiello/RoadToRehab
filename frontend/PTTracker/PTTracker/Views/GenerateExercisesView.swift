@@ -80,6 +80,14 @@ struct GenerateExercisesView: View {
                     }
                 }
             }
+            .onAppear {
+                // Pre-fetch symptoms data if needed to ensure it's ready
+                if symptomViewModel.symptoms.isEmpty {
+                    Task {
+                        await symptomViewModel.fetchSymptoms()
+                    }
+                }
+            }
         }
     }
     
@@ -99,25 +107,39 @@ struct GenerateExercisesView: View {
             return
         }
         
+        // Set state first
         isGenerating = true
         errorMessage = nil
         
+        // Create local copies of the values to avoid potential state changes during async operation
+        let selectedIds = selectedSymptomIds
+        let start = startDate
+        let duration = durationDays
+        
         Task {
             do {
-                // Call the view model to generate exercises
-                await exercisesViewModel.generateExercises(
-                    symptomIds: selectedSymptomIds,
-                    startDate: startDate,
-                    durationDays: durationDays
-                )
-                
-                // Close the sheet on successful generation
-                DispatchQueue.main.async {
-                    isGenerating = false
-                    isPresented = false
+                // Ensure we're on main thread before accessing ViewModel
+                await MainActor.run {
+                    // Call the view model to generate exercises
+                    // Use the actual API signature (without completion handler if it doesn't expect one)
+                    Task {
+                        do {
+                            try await exercisesViewModel.generateExercises(
+                                symptomIds: selectedIds,
+                                startDate: start,
+                                durationDays: duration
+                            )
+                            
+                            isGenerating = false
+                            isPresented = false
+                        } catch {
+                            isGenerating = false
+                            errorMessage = "Failed to generate exercises: \(error.localizedDescription)"
+                        }
+                    }
                 }
             } catch {
-                DispatchQueue.main.async {
+                await MainActor.run {
                     isGenerating = false
                     errorMessage = "Failed to generate exercises: \(error.localizedDescription)"
                 }

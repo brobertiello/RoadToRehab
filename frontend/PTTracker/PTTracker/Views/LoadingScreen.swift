@@ -1,7 +1,6 @@
 import SwiftUI
-import UIKit // Required for UIApplication extension
+import UIKit
 
-// LoadingIconView from MediaPipe
 struct LoadingIconView: View {
     let icons = [
         "figure.basketball",
@@ -16,10 +15,8 @@ struct LoadingIconView: View {
     ]
     
     @State private var currentIndex = 0
+    @State private var cycleComplete = false
     let onIconChange: (Int, Int) -> Void
-    
-    // App blue color
-    let appBlue = Color(red: 0.0, green: 0.478, blue: 1.0)
     
     init(onIconChange: @escaping (Int, Int) -> Void = { _, _ in }) {
         self.onIconChange = onIconChange
@@ -36,7 +33,7 @@ struct LoadingIconView: View {
             Image(systemName: icons[currentIndex])
                 .font(.system(size: 60, weight: .regular, design: .default))
                 .symbolRenderingMode(.hierarchical)
-                .foregroundColor(appBlue) // Use app blue color
+                .foregroundColor(.white)
                 .frame(width: 80, height: 80) // Fixed size for all icons
                 .transition(.opacity.combined(with: .scale))
                 .id(currentIndex) // Force view recreation on index change
@@ -45,41 +42,44 @@ struct LoadingIconView: View {
         }
         .frame(width: 120, height: 120) // Consistent outer frame
         .onAppear {
-            // Timer to change the symbol every 0.6 seconds (faster animation)
-            Timer.scheduledTimer(withTimeInterval: 0.6, repeats: true) { timer in
+            // Timer to change the symbol every 0.8 seconds
+            Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { timer in
                 withAnimation(.easeInOut(duration: 0.3)) {
                     // Update index and notify parent about progress
+                    let oldIndex = currentIndex
                     currentIndex = (currentIndex + 1) % icons.count
                     
                     // Notify parent about icon change and total count
                     onIconChange(currentIndex, icons.count)
+                    
+                    // Check if we've shown all icons (completed one full cycle)
+                    if oldIndex == icons.count - 1 {
+                        cycleComplete = true
+                        timer.invalidate() // Stop the timer after one full cycle
+                    }
                 }
             }
         }
     }
 }
 
-// LoadingScreen from MediaPipe
 struct LoadingScreen: View {
     @Binding var isLoaded: Bool
     @State private var progress = 0.0
     @State private var showText = false
     @State private var animationComplete = false
     @State private var currentIconIndex = 0
-    @State private var totalIcons = 9 // Default, will be updated
+    @State private var totalIcons = 10 // Default, will be updated
     
     // Timer for smooth progress bar animation
     @State private var progressTimer: Timer?
-    // Total loading duration in seconds - shorter to match actual loading
-    private let totalLoadingTime: Double = 3.0
-    
-    // App blue color
-    let appBlue = Color(red: 0.0, green: 0.478, blue: 1.0)
+    // Total loading duration in seconds
+    private let totalLoadingTime: Double = 8.0
     
     var body: some View {
         ZStack {
-            // Background - white instead of black
-            Color.white.edgesIgnoringSafeArea(.all)
+            // Background
+            Color.black.edgesIgnoringSafeArea(.all)
             
             // Fixed layout with specific spacing and alignment
             VStack(spacing: 0) {
@@ -92,15 +92,21 @@ struct LoadingScreen: View {
                     LoadingIconView(onIconChange: { index, total in
                         totalIcons = total
                         currentIconIndex = index
+                        
+                        // When we reach the last icon, ensure we're close to done
+                        if index == total - 1 && progress < 0.9 {
+                            // Speed up if needed to ensure we complete together
+                            progress = 0.9
+                        }
                     })
                 }
                 .frame(height: 120) // Fixed height for icon area
                 .padding(.bottom, 40)
                 
                 // App title with appearance animation
-                Text("Road to Recovery")
+                Text("Road To Rehab")
                     .font(.largeTitle.bold())
-                    .foregroundColor(appBlue) // Use app blue color
+                    .foregroundColor(.white)
                     .opacity(showText ? 1 : 0)
                     .scaleEffect(showText ? 1 : 0.8)
                     .frame(height: 50) // Fixed height
@@ -115,7 +121,7 @@ struct LoadingScreen: View {
                     
                     RoundedRectangle(cornerRadius: 8)
                         .frame(width: 200 * progress, height: 4)
-                        .foregroundColor(appBlue) // Use app blue color
+                        .foregroundColor(.white)
                 }
                 .frame(height: 20) // Fixed height including padding
             }
@@ -147,13 +153,20 @@ struct LoadingScreen: View {
             let elapsed = Date().timeIntervalSince(startTime)
             
             // Very simple, completely linear progression based only on time
+            // This ensures absolutely constant rate regardless of icon changes
             progress = min(elapsed / totalLoadingTime, 1.0)
             
-            // If we're done, prepare for dismissal without waiting for specific icon
-            if progress >= 1.0 {
+            // If we're done, prepare for dismissal
+            if progress >= 0.99 && currentIconIndex == totalIcons - 1 {
                 progress = 1.0
                 timer.invalidate()
                 prepareForDismissal()
+            }
+            
+            // If we're nearly done with time but still showing icons, slow down progress
+            if progress > 0.95 && currentIconIndex < totalIcons - 1 {
+                // Hold at 95% until the last icon is shown
+                progress = 0.95
             }
         }
     }
@@ -170,8 +183,8 @@ struct LoadingScreen: View {
                 window.addGestureRecognizer(tapGesture)
             }
             
-            // Transition to main content immediately with a smooth animation
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            // Transition to main content after a short delay to allow final animations
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 withAnimation(.easeOut(duration: 0.5)) {
                     isLoaded = true
                 }
@@ -193,54 +206,5 @@ extension UIApplication {
     @objc func dismissLoadingScreen() {
         // This is needed to make the loading screen dismissable by tap
         NotificationCenter.default.post(name: Notification.Name("DismissLoadingScreen"), object: nil)
-    }
-}
-
-struct ContentView: View {
-    @EnvironmentObject var authManager: AuthManager
-    @EnvironmentObject var appState: AppState
-    @State private var isAppLoaded = false
-    
-    var body: some View {
-        ZStack {
-            // Always show loading screen first on app's first launch
-            // regardless of authentication status
-            if !isAppLoaded && appState.isFirstLaunch {
-                // Loading screen
-                LoadingScreen(isLoaded: $isAppLoaded)
-                    .onAppear {
-                        // Set up notification observer for the loading screen
-                        setupLoadingScreenObserver()
-                    }
-            } else {
-                // Main app content
-                Group {
-                    if authManager.isAuthenticated {
-                        DashboardView()
-                    } else {
-                        LandingView()
-                    }
-                }
-                .transition(.opacity)
-            }
-        }
-        .animation(.easeOut(duration: 0.5), value: isAppLoaded)
-    }
-    
-    // Setup notification observer for loading screen dismissal
-    private func setupLoadingScreenObserver() {
-        NotificationCenter.default.addObserver(forName: Notification.Name("DismissLoadingScreen"), object: nil, queue: .main) { _ in
-            withAnimation(.easeOut(duration: 0.5)) {
-                isAppLoaded = true
-            }
-        }
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-            .environmentObject(AuthManager.shared)
-            .environmentObject(AppState())
     }
 } 

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -75,6 +75,10 @@
 		FBFF50652EE7AF3C9CC479A9 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		B8668EC42DA2A7EC00BC645B /* Assets.xcassets */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXGroup section */
 		282443E8BD490CDA63537A21 /* Services */ = {
 			isa = PBXGroup;
@@ -124,6 +128,7 @@
 		81C9F111022CC9D24599A52B /* PTTracker */ = {
 			isa = PBXGroup;
 			children = (
+				B8668EC42DA2A7EC00BC645B /* Assets.xcassets */,
 				B76BB943979D61BFB0287297 /* PTTrackerApp.swift */,
 				996D3FFAE903449318B2F1A8 /* Models */,
 				282443E8BD490CDA63537A21 /* Services */,
@@ -190,6 +195,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				B8668EC42DA2A7EC00BC645B /* Assets.xcassets */,
 			);
 			name = PTTracker;
 			productName = PTTracker;
