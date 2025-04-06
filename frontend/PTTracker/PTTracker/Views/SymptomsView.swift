@@ -153,6 +153,14 @@ struct SymptomRow: View {
                     .foregroundColor(.gray)
             }
             
+            // Show notes if available
+            if let notes = symptom.notes, !notes.isEmpty {
+                Text(notes)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.top, 2)
+            }
+            
             // Progress bar for pain level
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {

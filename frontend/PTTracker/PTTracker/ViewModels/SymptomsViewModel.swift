@@ -37,15 +37,15 @@ class SymptomsViewModel: ObservableObject {
         }
     }
     
-    func addSymptom(bodyPart: String, severity: Int) async throws {
-        let newSymptom = try await symptomService.createSymptom(bodyPart: bodyPart, severity: severity)
+    func addSymptom(bodyPart: String, severity: Int, notes: String? = nil) async throws {
+        let newSymptom = try await symptomService.createSymptom(bodyPart: bodyPart, severity: severity, notes: notes)
         DispatchQueue.main.async {
             self.symptoms.append(newSymptom)
         }
     }
     
-    func updateSymptom(symptomId: String, severity: Int) async throws {
-        let updatedSymptom = try await symptomService.updateSymptom(id: symptomId, severity: severity)
+    func updateSymptom(symptomId: String, severity: Int, notes: String? = nil) async throws {
+        let updatedSymptom = try await symptomService.updateSymptom(id: symptomId, severity: severity, notes: notes)
         DispatchQueue.main.async {
             if let index = self.symptoms.firstIndex(where: { $0.id == symptomId }) {
                 self.symptoms[index] = updatedSymptom

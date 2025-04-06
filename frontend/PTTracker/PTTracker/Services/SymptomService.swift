@@ -52,7 +52,7 @@ class SymptomService {
         }
     }
     
-    func createSymptom(bodyPart: String, severity: Int) async throws -> Symptom {
+    func createSymptom(bodyPart: String, severity: Int, notes: String? = nil) async throws -> Symptom {
         guard let token = authManager.authToken else {
             throw APIError.unauthorized
         }
@@ -64,12 +64,17 @@ class SymptomService {
         // Use a format MongoDB will accept
         let currentDate = ISO8601DateFormatter().string(from: Date())
         
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "bodyPart": bodyPart,
             "severities": [
                 ["value": severity, "date": currentDate]
             ]
         ]
+        
+        // Add notes if provided
+        if let notes = notes {
+            body["notes"] = notes
+        }
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -108,7 +113,7 @@ class SymptomService {
         }
     }
     
-    func updateSymptom(id: String, severity: Int) async throws -> Symptom {
+    func updateSymptom(id: String, severity: Int, notes: String? = nil) async throws -> Symptom {
         guard let token = authManager.authToken else {
             throw APIError.unauthorized
         }
@@ -120,12 +125,17 @@ class SymptomService {
         // Use a format MongoDB will accept
         let currentDate = ISO8601DateFormatter().string(from: Date())
         
-        // Adding a new severity to the existing ones
-        let body: [String: Any] = [
+        // Preparing the update data
+        var body: [String: Any] = [
             "severities": [
                 ["value": severity, "date": currentDate]
             ]
         ]
+        
+        // Add notes update if provided
+        if let notes = notes {
+            body["notes"] = notes
+        }
         
         var request = URLRequest(url: url)
         request.httpMethod = "PATCH"
