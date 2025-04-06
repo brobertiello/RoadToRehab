@@ -3,7 +3,8 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var chatViewModel: ChatViewModel
-    @StateObject var symptomsViewModel = SymptomsViewModel()
+    @EnvironmentObject var symptomsViewModel: SymptomsViewModel
+    @EnvironmentObject var exercisesViewModel: ExercisesViewModel
     @State private var selectedTab = 0
     @State private var showChatView = false
     
@@ -31,7 +32,6 @@ struct DashboardView: View {
                 NavigationView {
                     RecoveryPlanView()
                 }
-                .environmentObject(symptomsViewModel)
                 .tabItem {
                     Image(systemName: "figure.walk")
                     Text("Recovery")
@@ -77,6 +77,7 @@ struct DashboardView: View {
             // Load symptoms for the recovery plan
             Task {
                 await symptomsViewModel.fetchSymptoms()
+                await exercisesViewModel.fetchExercises()
             }
         }
     }

@@ -132,6 +132,6 @@ struct GenerateExercisesView_Previews: PreviewProvider {
             isPresented: .constant(true),
             exercisesViewModel: ExercisesViewModel(authManager: AuthManager.shared)
         )
-        .environmentObject(SymptomsViewModel())
+        .environmentObject(SymptomsViewModel(authManager: AuthManager.shared))
     }
 } 

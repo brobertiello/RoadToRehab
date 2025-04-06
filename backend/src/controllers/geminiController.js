@@ -1,7 +1,4 @@
 const geminiService = require("../services/geminiService");
-const Exercise = require("../models/Exercise");
-const Symptom = require("../models/Symptom");
-const RecoveryPlan = require("../models/RecoveryPlan");
 
 exports.chatInteraction = async (req, res) => {
   try {

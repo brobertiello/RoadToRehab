@@ -3,7 +3,7 @@ import SwiftUI
 struct RecoveryPlanView: View {
     @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var symptomViewModel: SymptomsViewModel
-    @StateObject var exercisesViewModel = ExercisesViewModel(authManager: AuthManager.shared)
+    @EnvironmentObject var exercisesViewModel: ExercisesViewModel
     
     @State private var showingGenerateSheet = false
     @State private var selectedDate: Date = Date()
@@ -189,11 +189,15 @@ struct WeeklyView: View {
             } else {
                 List {
                     ForEach(viewModel.exercisesForDate(selectedDate)) { exercise in
-                        ExerciseRowView(exercise: exercise) {
-                            Task {
-                                await viewModel.toggleExerciseCompletion(exercise: exercise)
-                            }
-                        }
+                        ExerciseRowView(
+                            exercise: exercise,
+                            toggleCompletion: {
+                                Task {
+                                    await viewModel.toggleExerciseCompletion(exercise: exercise)
+                                }
+                            },
+                            viewModel: viewModel
+                        )
                     }
                 }
             }
@@ -322,11 +326,15 @@ struct CalendarView: View {
             } else {
                 List {
                     ForEach(viewModel.exercisesForDate(selectedDate)) { exercise in
-                        ExerciseRowView(exercise: exercise) {
-                            Task {
-                                await viewModel.toggleExerciseCompletion(exercise: exercise)
-                            }
-                        }
+                        ExerciseRowView(
+                            exercise: exercise,
+                            toggleCompletion: {
+                                Task {
+                                    await viewModel.toggleExerciseCompletion(exercise: exercise)
+                                }
+                            },
+                            viewModel: viewModel
+                        )
                     }
                 }
             }
@@ -455,11 +463,15 @@ struct ExerciseListView: View {
                     if let exercises = groupedExercises[date] {
                         Section(header: Text(dateFormatter.string(from: date))) {
                             ForEach(exercises) { exercise in
-                                ExerciseRowView(exercise: exercise) {
-                                    Task {
-                                        await viewModel.toggleExerciseCompletion(exercise: exercise)
-                                    }
-                                }
+                                ExerciseRowView(
+                                    exercise: exercise,
+                                    toggleCompletion: {
+                                        Task {
+                                            await viewModel.toggleExerciseCompletion(exercise: exercise)
+                                        }
+                                    },
+                                    viewModel: viewModel
+                                )
                                 .swipeActions {
                                     Button(role: .destructive) {
                                         Task {
@@ -494,50 +506,53 @@ struct ExerciseListView: View {
 struct ExerciseRowView: View {
     let exercise: Exercise
     let toggleCompletion: () -> Void
+    @ObservedObject var viewModel: ExercisesViewModel
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(exercise.exerciseType)
-                        .font(.headline)
-                        .foregroundColor(exercise.completed ? .gray : .primary)
-                        .strikethrough(exercise.completed)
+        NavigationLink(destination: ExerciseDetailView(viewModel: viewModel, exercise: exercise)) {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text(exercise.exerciseType)
+                            .font(.headline)
+                            .foregroundColor(exercise.completed ? .gray : .primary)
+                            .strikethrough(exercise.completed)
+                        
+                        Text(exercise.description)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                    }
                     
-                    Text(exercise.description)
-                        .font(.subheadline)
+                    Spacer()
+                    
+                    Button(action: toggleCompletion) {
+                        Image(systemName: exercise.completed ? "checkmark.circle.fill" : "circle")
+                            .foregroundColor(exercise.completed ? .green : .gray)
+                            .font(.title2)
+                    }
+                }
+                
+                HStack {
+                    Text(exercise.formattedDuration)
+                        .font(.caption)
+                        .padding(5)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(5)
+                    
+                    Text(exercise.difficultyText)
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                }
+                
+                if let notes = exercise.notes, !notes.isEmpty {
+                    Text(notes)
+                        .font(.caption)
                         .foregroundColor(.secondary)
-                        .lineLimit(2)
-                }
-                
-                Spacer()
-                
-                Button(action: toggleCompletion) {
-                    Image(systemName: exercise.completed ? "checkmark.circle.fill" : "circle")
-                        .foregroundColor(exercise.completed ? .green : .gray)
-                        .font(.title2)
                 }
             }
-            
-            HStack {
-                Text(exercise.formattedDuration)
-                    .font(.caption)
-                    .padding(5)
-                    .background(Color.blue.opacity(0.1))
-                    .cornerRadius(5)
-                
-                Text(exercise.difficultyText)
-                    .font(.caption)
-                    .foregroundColor(.orange)
-            }
-            
-            if let notes = exercise.notes, !notes.isEmpty {
-                Text(notes)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
+            .padding(.vertical, 5)
         }
-        .padding(.vertical, 5)
     }
 }
 
@@ -546,6 +561,7 @@ struct RecoveryPlanView_Previews: PreviewProvider {
     static var previews: some View {
         RecoveryPlanView()
             .environmentObject(AuthManager.shared)
-            .environmentObject(SymptomsViewModel())
+            .environmentObject(SymptomsViewModel(authManager: AuthManager.shared))
+            .environmentObject(ExercisesViewModel(authManager: AuthManager.shared))
     }
 } 

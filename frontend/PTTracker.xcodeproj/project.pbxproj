@@ -16,7 +16,12 @@
 		2CE8A8738A0DF36D14B95311 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550F80C780DB67AD24C13507 /* DashboardView.swift */; };
 		2D5858432DA1BD67001CB608 /* DatabaseConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D5858422DA1BD66001CB608 /* DatabaseConfigService.swift */; };
 		2D5858452DA1BD80001CB608 /* DatabaseConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D5858442DA1BD80001CB608 /* DatabaseConfigView.swift */; };
-		31B4CCFC0CB4E6DB3507BB4D /* RecoveryPlanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F611DCF0CCA6214009673F08 /* RecoveryPlanService.swift */; };
+		2D90BE482DA292E70064B407 /* ExercisesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D90BE462DA292E70064B407 /* ExercisesViewModel.swift */; };
+		2D90BE492DA292E70064B407 /* SymptomViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D90BE472DA292E70064B407 /* SymptomViewModel.swift */; };
+		2D90BE4B2DA292FD0064B407 /* Exercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D90BE4A2DA292FD0064B407 /* Exercise.swift */; };
+		2D90BE4D2DA293050064B407 /* ExerciseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D90BE4C2DA293050064B407 /* ExerciseService.swift */; };
+		2D90BE4F2DA293130064B407 /* HTMLFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D90BE4E2DA293130064B407 /* HTMLFormatter.swift */; };
+		2D90BE512DA293200064B407 /* GenerateExercisesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D90BE502DA293200064B407 /* GenerateExercisesView.swift */; };
 		3CB84698938FAEF4EFC4BC2E /* RecoveryPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226018281B24DBA389E0273F /* RecoveryPlanView.swift */; };
 		41B2BC65D1231F9FDA56ADBF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71C581786D6B1F0A1473133D /* ContentView.swift */; };
 		42B48AD1AB6C01126468D4D7 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965F6AB7871EE52F6194990A /* SettingsView.swift */; };
@@ -25,7 +30,6 @@
 		5C5A79E8CB555E432CFF846C /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6511FCBCCB1480FEFA57F4B3 /* User.swift */; };
 		5F6FD0E1A0648D705772D7DF /* ExerciseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04541EDE21760B893731654C /* ExerciseDetailView.swift */; };
 		6275D2411EF633DB39EA8983 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCFB9BF366878660256DE47E /* KeychainHelper.swift */; };
-		76922F76F91658A1189642D7 /* RecoveryPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22E70AF8DD6CEA715A287371 /* RecoveryPlanViewModel.swift */; };
 		93D1E08512C83053129D8431 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 818F5A60F7E4EB740A5C69AA /* ChatViewModel.swift */; };
 		B79D13AA39AFE7F86230883D /* LandingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BD553E772FA1ED3F1AA076E /* LandingView.swift */; };
 		CA026E4D2ECE0F9ECE6B52F5 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFF50652EE7AF3C9CC479A9 /* AuthManager.swift */; };
@@ -41,10 +45,15 @@
 		12B299C6B70978FA7CE8AF13 /* UpdateSymptomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateSymptomView.swift; sourceTree = "<group>"; };
 		150EEC725425D787CBAB4CA7 /* AddSymptomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSymptomView.swift; sourceTree = "<group>"; };
 		226018281B24DBA389E0273F /* RecoveryPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryPlanView.swift; sourceTree = "<group>"; };
-		22E70AF8DD6CEA715A287371 /* RecoveryPlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryPlanViewModel.swift; sourceTree = "<group>"; };
 		23BCB8BD57FB0728B2B87CFA /* NetworkUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkUtils.swift; sourceTree = "<group>"; };
 		2D5858422DA1BD66001CB608 /* DatabaseConfigService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseConfigService.swift; sourceTree = "<group>"; };
 		2D5858442DA1BD80001CB608 /* DatabaseConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseConfigView.swift; sourceTree = "<group>"; };
+		2D90BE462DA292E70064B407 /* ExercisesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExercisesViewModel.swift; sourceTree = "<group>"; };
+		2D90BE472DA292E70064B407 /* SymptomViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomViewModel.swift; sourceTree = "<group>"; };
+		2D90BE4A2DA292FD0064B407 /* Exercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exercise.swift; sourceTree = "<group>"; };
+		2D90BE4C2DA293050064B407 /* ExerciseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseService.swift; sourceTree = "<group>"; };
+		2D90BE4E2DA293130064B407 /* HTMLFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTMLFormatter.swift; sourceTree = "<group>"; };
+		2D90BE502DA293200064B407 /* GenerateExercisesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerateExercisesView.swift; sourceTree = "<group>"; };
 		4747202A378F87ABF52C1107 /* SymptomService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomService.swift; sourceTree = "<group>"; };
 		481584D8F6536005F748C2F4 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		54792C0E233ABEF97C0D577E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -63,7 +72,6 @@
 		CCFB9BF366878660256DE47E /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		D19E58083E1BC66748D946F7 /* SymptomsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymptomsView.swift; sourceTree = "<group>"; };
 		DC8DF6523B644779B49F9F03 /* PTTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PTTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F611DCF0CCA6214009673F08 /* RecoveryPlanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryPlanService.swift; sourceTree = "<group>"; };
 		FBFF50652EE7AF3C9CC479A9 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -71,10 +79,10 @@
 		282443E8BD490CDA63537A21 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				2D90BE4C2DA293050064B407 /* ExerciseService.swift */,
 				2D5858422DA1BD66001CB608 /* DatabaseConfigService.swift */,
 				FBFF50652EE7AF3C9CC479A9 /* AuthManager.swift */,
 				8A567B2A7BB1BB710B7913A3 /* ChatService.swift */,
-				F611DCF0CCA6214009673F08 /* RecoveryPlanService.swift */,
 				4747202A378F87ABF52C1107 /* SymptomService.swift */,
 			);
 			path = Services;
@@ -83,8 +91,9 @@
 		60E01C8C7AF4C78CF8456ACF /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				2D90BE462DA292E70064B407 /* ExercisesViewModel.swift */,
+				2D90BE472DA292E70064B407 /* SymptomViewModel.swift */,
 				818F5A60F7E4EB740A5C69AA /* ChatViewModel.swift */,
-				22E70AF8DD6CEA715A287371 /* RecoveryPlanViewModel.swift */,
 				55CCEBBE7986D78DC685CDCF /* SymptomsViewModel.swift */,
 			);
 			path = ViewModels;
@@ -93,6 +102,7 @@
 		8175EEF1BBFA535DF9D23529 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2D90BE502DA293200064B407 /* GenerateExercisesView.swift */,
 				2D5858442DA1BD80001CB608 /* DatabaseConfigView.swift */,
 				150EEC725425D787CBAB4CA7 /* AddSymptomView.swift */,
 				481584D8F6536005F748C2F4 /* ChatView.swift */,
@@ -127,6 +137,7 @@
 		996D3FFAE903449318B2F1A8 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				2D90BE4A2DA292FD0064B407 /* Exercise.swift */,
 				C3CF1945F77DA45D8E40C0CE /* Symptom.swift */,
 				6511FCBCCB1480FEFA57F4B3 /* User.swift */,
 			);
@@ -152,6 +163,7 @@
 		E0052B3C1E811E726A6E43CD /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				2D90BE4E2DA293130064B407 /* HTMLFormatter.swift */,
 				CCFB9BF366878660256DE47E /* KeychainHelper.swift */,
 				23BCB8BD57FB0728B2B87CFA /* NetworkUtils.swift */,
 			);
@@ -216,10 +228,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				FFE3B062D1794B8F2234B1C4 /* AddSymptomView.swift in Sources */,
+				2D90BE4F2DA293130064B407 /* HTMLFormatter.swift in Sources */,
 				CA026E4D2ECE0F9ECE6B52F5 /* AuthManager.swift in Sources */,
 				5A10161EC280B7FC1DA25754 /* ChatService.swift in Sources */,
+				2D90BE4D2DA293050064B407 /* ExerciseService.swift in Sources */,
 				D7A037000DEF76FB88F8178A /* ChatView.swift in Sources */,
 				93D1E08512C83053129D8431 /* ChatViewModel.swift in Sources */,
+				2D90BE4B2DA292FD0064B407 /* Exercise.swift in Sources */,
 				41B2BC65D1231F9FDA56ADBF /* ContentView.swift in Sources */,
 				2D5858432DA1BD67001CB608 /* DatabaseConfigService.swift in Sources */,
 				2CE8A8738A0DF36D14B95311 /* DashboardView.swift in Sources */,
@@ -231,11 +246,12 @@
 				D055673C8D807CFFD2C7B856 /* NetworkUtils.swift in Sources */,
 				1F644C70FB56489F340EAE44 /* PTTrackerApp.swift in Sources */,
 				DCDB0BAA7A9BF62AFDF1CCF9 /* ProfileView.swift in Sources */,
-				31B4CCFC0CB4E6DB3507BB4D /* RecoveryPlanService.swift in Sources */,
 				3CB84698938FAEF4EFC4BC2E /* RecoveryPlanView.swift in Sources */,
-				76922F76F91658A1189642D7 /* RecoveryPlanViewModel.swift in Sources */,
 				0E4B66CD517CD377D6AA32EB /* RegisterView.swift in Sources */,
+				2D90BE482DA292E70064B407 /* ExercisesViewModel.swift in Sources */,
+				2D90BE492DA292E70064B407 /* SymptomViewModel.swift in Sources */,
 				42B48AD1AB6C01126468D4D7 /* SettingsView.swift in Sources */,
+				2D90BE512DA293200064B407 /* GenerateExercisesView.swift in Sources */,
 				2733AFC1CB619E43F14FC5DE /* Symptom.swift in Sources */,
 				172C94D1280ADE5C035988E7 /* SymptomService.swift in Sources */,
 				0B49A0557A4FFD992FBF7B08 /* SymptomsView.swift in Sources */,
