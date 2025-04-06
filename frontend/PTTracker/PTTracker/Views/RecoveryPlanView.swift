@@ -125,7 +125,7 @@ struct WeeklyView: View {
     @Binding var selectedDate: Date
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             // Week navigation
             HStack {
                 Text(weekRange)
@@ -141,6 +141,7 @@ struct WeeklyView: View {
                 }
             }
             .padding(.horizontal)
+            .padding(.bottom, 4) // Minimal space before the calendar
             
             // Days of week
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 10) {
@@ -151,6 +152,7 @@ struct WeeklyView: View {
                 }
             }
             .padding(.horizontal)
+            .padding(.bottom, 4) // Minimal space between headers and dates
             
             // Week days with exercise indicators
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 10) {
@@ -189,7 +191,8 @@ struct WeeklyView: View {
             .padding(.horizontal)
             
             Divider()
-                .padding(.vertical)
+                .padding(.top, 8) // Minimal space after the calendar
+                .padding(.bottom, 0) // No space after the divider
             
             // Exercises for selected day
             if viewModel.exercisesForDate(selectedDate).isEmpty {
@@ -282,7 +285,7 @@ struct CalendarView: View {
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
     
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             // Month navigation
             HStack {
                 Text(selectedDate.formatted(.dateTime.month(.wide).year()))
@@ -298,6 +301,7 @@ struct CalendarView: View {
                 }
             }
             .padding(.horizontal)
+            .padding(.bottom, 4) // Minimal space before the calendar
             
             // Days of week header
             LazyVGrid(columns: columns, spacing: 10) {
@@ -308,6 +312,7 @@ struct CalendarView: View {
                 }
             }
             .padding(.horizontal)
+            .padding(.bottom, 4) // Minimal space between headers and dates
             
             // Calendar grid
             LazyVGrid(columns: columns, spacing: 10) {
@@ -326,7 +331,8 @@ struct CalendarView: View {
             .padding(.horizontal)
             
             Divider()
-                .padding(.vertical)
+                .padding(.top, 8) // Minimal space after the calendar
+                .padding(.bottom, 0) // No space after the divider
             
             // Exercises for selected day
             if viewModel.exercisesForDate(selectedDate).isEmpty {
