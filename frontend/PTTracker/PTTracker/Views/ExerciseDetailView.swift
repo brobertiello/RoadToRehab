@@ -13,6 +13,7 @@ struct ExerciseDetailView: View {
     @State private var showingDeleteAlert = false
     @State private var isUpdating = false
     @State private var errorMessage: String? = nil
+    @State private var showingSuccessMessage = false
     
     init(viewModel: ExercisesViewModel, exercise: Exercise) {
         self.viewModel = viewModel
@@ -27,11 +28,36 @@ struct ExerciseDetailView: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
             VStack(alignment: .leading, spacing: 20) {
-                // Exercise type and description
+                // Header with completion toggle and top actions
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(exercise.exerciseType)
-                        .font(.title)
-                        .fontWeight(.bold)
+                    HStack {
+                        Text(exercise.exerciseType)
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(isCompleted ? .gray : .primary)
+                            .strikethrough(isCompleted)
+                        
+                        Spacer()
+                        
+                        // Quick toggle without entering edit mode
+                        Button(action: {
+                            toggleCompletion()
+                        }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: isCompleted ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(isCompleted ? .green : .gray)
+                                    .font(.title2)
+                                
+                                Text(isCompleted ? "Completed" : "Mark Complete")
+                                    .font(.subheadline)
+                                    .foregroundColor(isCompleted ? .green : .gray)
+                            }
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 10)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                    }
                     
                     Text(exercise.description)
                         .font(.body)
@@ -42,27 +68,90 @@ struct ExerciseDetailView: View {
                 
                 Divider()
                 
-                // Exercise details
+                // Exercise details grid
                 VStack(alignment: .leading, spacing: 16) {
-                    detailRow(icon: "calendar", title: "Scheduled Date") {
+                    // Scheduled date with visual calendar
+                    HStack(alignment: .center) {
+                        Label("Scheduled", systemImage: "calendar")
+                            .font(.headline)
+                            .foregroundColor(.blue)
+                            .frame(width: 110, alignment: .leading)
+                        
+                        Spacer()
+                        
                         if isEditing {
                             DatePicker("", selection: $scheduledDate, displayedComponents: .date)
                                 .labelsHidden()
+                                .frame(maxWidth: .infinity, alignment: .trailing)
                         } else {
-                            Text(scheduledDate.formatted(.dateTime.month().day().year()))
+                            HStack {
+                                Text(scheduledDate.formatted(.dateTime.month().day().year()))
+                                    .font(.body)
+                                
+                                // Visual indicator for today
+                                if Calendar.current.isDateInToday(scheduledDate) {
+                                    Text("Today")
+                                        .font(.caption)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 2)
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(8)
+                                }
+                            }
                         }
                     }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal)
+                    .background(Color.gray.opacity(0.05))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
                     
-                    detailRow(icon: "clock", title: "Duration") {
+                    // Duration info
+                    HStack {
+                        Label("Duration", systemImage: "clock")
+                            .font(.headline)
+                            .foregroundColor(.blue)
+                            .frame(width: 110, alignment: .leading)
+                        
+                        Spacer()
+                        
                         Text(exercise.formattedDuration)
+                            .font(.body)
                     }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal)
+                    .background(Color.gray.opacity(0.05))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
                     
-                    detailRow(icon: "star.fill", title: "Difficulty") {
+                    // Difficulty stars
+                    HStack {
+                        Label("Difficulty", systemImage: "star.fill")
+                            .font(.headline)
+                            .foregroundColor(.blue)
+                            .frame(width: 110, alignment: .leading)
+                        
+                        Spacer()
+                        
                         Text(exercise.difficultyText)
                             .foregroundColor(.orange)
                     }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal)
+                    .background(Color.gray.opacity(0.05))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
                     
-                    detailRow(icon: "checkmark.circle", title: "Status") {
+                    // Status (completed or not)
+                    HStack {
+                        Label("Status", systemImage: "checkmark.circle")
+                            .font(.headline)
+                            .foregroundColor(.blue)
+                            .frame(width: 110, alignment: .leading)
+                        
+                        Spacer()
+                        
                         if isEditing {
                             Toggle("", isOn: $isCompleted)
                                 .labelsHidden()
@@ -71,38 +160,133 @@ struct ExerciseDetailView: View {
                                 .foregroundColor(isCompleted ? .green : .red)
                         }
                     }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal)
+                    .background(Color.gray.opacity(0.05))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
                     
+                    // Notes section
                     VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Image(systemName: "note.text")
-                                .frame(width: 25)
-                                .foregroundColor(.blue)
-                            Text("Notes")
-                                .font(.headline)
-                        }
+                        Label("Notes", systemImage: "note.text")
+                            .font(.headline)
+                            .foregroundColor(.blue)
                         
                         if isEditing {
                             TextEditor(text: $notes)
-                                .frame(minHeight: 100)
+                                .frame(minHeight: 120)
                                 .padding(4)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                                 )
+                                .cornerRadius(8)
                         } else {
                             Text(notes.isEmpty ? "No notes added" : notes)
                                 .foregroundColor(notes.isEmpty ? .secondary : .primary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.leading, 10)
+                                .padding()
+                                .background(Color.gray.opacity(0.05))
+                                .cornerRadius(8)
                         }
                     }
                     .padding(.horizontal)
                 }
                 
+                // Error and success messages
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .padding()
+                        .background(Color.red.opacity(0.1))
+                        .cornerRadius(8)
+                        .padding(.horizontal)
+                }
+                
+                if showingSuccessMessage {
+                    Text("Exercise updated successfully!")
+                        .foregroundColor(.green)
+                        .padding()
+                        .background(Color.green.opacity(0.1))
+                        .cornerRadius(8)
+                        .padding(.horizontal)
+                        .onAppear {
+                            // Auto-dismiss success message after a delay
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                withAnimation {
+                                    showingSuccessMessage = false
+                                }
+                            }
+                        }
+                }
+                
+                // Edit Mode buttons
+                if isEditing {
+                    HStack {
+                        Button(action: {
+                            isEditing = false
+                            // Reset to original values
+                            isCompleted = exercise.completed
+                            scheduledDate = exercise.scheduledDate
+                            notes = exercise.notes ?? ""
+                        }) {
+                            Text("Cancel")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.gray.opacity(0.2))
+                                .foregroundColor(.primary)
+                                .cornerRadius(10)
+                        }
+                        
+                        Button(action: {
+                            saveChanges()
+                        }) {
+                            if isUpdating {
+                                ProgressView()
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            } else {
+                                Text("Save Changes")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                            }
+                        }
+                        .disabled(isUpdating)
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 10)
+                } else {
+                    HStack {
+                        Button(action: {
+                            isEditing = true
+                        }) {
+                            Label("Edit Exercise", systemImage: "pencil")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                        
+                        Button(action: {
+                            showingDeleteAlert = true
+                        }) {
+                            Label("Delete", systemImage: "trash")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.red)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 10)
                 }
                 
                 Spacer(minLength: 30)
@@ -111,10 +295,11 @@ struct ExerciseDetailView: View {
         }
         .navigationTitle("Exercise Details")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarItems(
-            leading: leadingBarItem,
-            trailing: trailingBarItem
-        )
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Exercise Details").font(.headline)
+            }
+        }
         .alert("Delete Exercise", isPresented: $showingDeleteAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
@@ -125,68 +310,36 @@ struct ExerciseDetailView: View {
         }
     }
     
-    // Leading bar item (cancel button when editing)
-    @ViewBuilder
-    private var leadingBarItem: some View {
-        if isEditing {
-            Button("Cancel") {
-                isEditing = false
-                // Reset to original values
-                isCompleted = exercise.completed
-                scheduledDate = exercise.scheduledDate
-                notes = exercise.notes ?? ""
-            }
-        } else {
-            EmptyView()
-        }
-    }
-    
-    // Trailing bar item (save/edit/delete)
-    @ViewBuilder
-    private var trailingBarItem: some View {
-        if isEditing {
-            if isUpdating {
-                ProgressView()
-            } else {
-                Button("Save") {
-                    saveChanges()
-                }
-            }
-        } else {
-            Menu {
-                Button(action: {
-                    isEditing = true
-                }) {
-                    Label("Edit", systemImage: "pencil")
+    // Quick toggle completion function
+    private func toggleCompletion() {
+        isUpdating = true
+        
+        Task {
+            // Create a temporary copy of the exercise with toggled completion
+            var updatedExercise = exercise
+            updatedExercise.completed = !isCompleted
+            
+            // Update in database
+            await viewModel.toggleExerciseCompletion(exercise: updatedExercise)
+            
+            // Update local state
+            DispatchQueue.main.async {
+                isCompleted = !isCompleted
+                isUpdating = false
+                
+                // Show brief success message
+                withAnimation {
+                    showingSuccessMessage = true
                 }
                 
-                Button(action: {
-                    showingDeleteAlert = true
-                }) {
-                    Label("Delete", systemImage: "trash")
-                        .foregroundColor(.red)
+                // Hide success message after a delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    withAnimation {
+                        showingSuccessMessage = false
+                    }
                 }
-            } label: {
-                Image(systemName: "ellipsis.circle")
             }
         }
-    }
-    
-    // Helper function to create detail rows
-    private func detailRow<Content: View>(icon: String, title: String, @ViewBuilder content: () -> Content) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .frame(width: 25)
-                .foregroundColor(.blue)
-            
-            Text(title)
-                .font(.headline)
-            
-            Spacer()
-            
-            content()
-        }
-        .padding(.horizontal)
     }
     
     // Save changes function
@@ -196,52 +349,50 @@ struct ExerciseDetailView: View {
         
         Task {
             do {
-                // Use the ViewModel's toggle method instead of directly accessing exerciseService
                 // First update completion status if needed
                 if exercise.completed != isCompleted {
-                    await updateCompletionStatus()
+                    // Create a temporary exercise with updated completion
+                    var updatedExercise = exercise
+                    updatedExercise.completed = isCompleted
+                    await viewModel.toggleExerciseCompletion(exercise: updatedExercise)
                 }
                 
                 // Then update other fields
-                await updateExerciseDetails()
+                if let index = viewModel.exercises.firstIndex(where: { $0.id == exercise.id }) {
+                    // Update the exercise with new details
+                    var updatedExercise = viewModel.exercises[index]
+                    updatedExercise.scheduledDate = scheduledDate
+                    updatedExercise.notes = notes.isEmpty ? nil : notes
+                    
+                    // Update on server
+                    _ = try await viewModel.exerciseService.updateExercise(
+                        id: exercise.id,
+                        scheduledDate: scheduledDate,
+                        notes: notes.isEmpty ? nil : notes
+                    )
+                    
+                    // Update local copy
+                    viewModel.exercises[index] = updatedExercise
+                    viewModel.objectWillChange.send()
+                }
                 
                 DispatchQueue.main.async {
                     isUpdating = false
                     isEditing = false
+                    showingSuccessMessage = true
+                    
+                    // Refresh all exercises to ensure we have the latest data
+                    Task {
+                        await viewModel.refreshExercises()
+                    }
                 }
             } catch {
                 DispatchQueue.main.async {
                     errorMessage = "Failed to update exercise: \(error.localizedDescription)"
                     isUpdating = false
+                    print("Error saving exercise changes: \(error)")
                 }
             }
-        }
-    }
-    
-    // Helper to update completion status
-    private func updateCompletionStatus() async {
-        // Find the exercise in the viewModel
-        if let index = viewModel.exercises.firstIndex(where: { $0.id == exercise.id }) {
-            // Create a temporary updated exercise with the new completion status
-            var updatedExercise = viewModel.exercises[index]
-            // Only toggle completion if it's different
-            if updatedExercise.completed != isCompleted {
-                // Use the viewModel method to toggle
-                await viewModel.toggleExerciseCompletion(exercise: updatedExercise)
-            }
-        }
-    }
-    
-    // Helper to update exercise details
-    private func updateExerciseDetails() async {
-        // Find the exercise in the viewModel
-        if let index = viewModel.exercises.firstIndex(where: { $0.id == exercise.id }) {
-            // Update the exercise directly in the viewModel
-            var updatedExercise = viewModel.exercises[index]
-            updatedExercise.scheduledDate = scheduledDate
-            updatedExercise.notes = notes.isEmpty ? nil : notes
-            // Update in the viewModel
-            viewModel.exercises[index] = updatedExercise
         }
     }
     

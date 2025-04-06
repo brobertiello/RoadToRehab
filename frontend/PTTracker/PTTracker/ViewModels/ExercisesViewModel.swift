@@ -7,8 +7,10 @@ class ExercisesViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
     @Published var filterSymptomId: String? = nil
+    @Published var lastUpdated: Date = Date()
     
-    private let exerciseService: ExerciseService
+    // Make service accessible
+    let exerciseService: ExerciseService
     
     init(authManager: AuthManager) {
         self.exerciseService = ExerciseService(authManager: authManager)
@@ -22,13 +24,22 @@ class ExercisesViewModel: ObservableObject {
         do {
             exercises = try await exerciseService.getExercises()
             isLoading = false
+            lastUpdated = Date()
+            print("Fetched \(exercises.count) exercises. Completed: \(exercises.filter { $0.completed }.count)")
         } catch let error as APIError {
             errorMessage = error.localizedDescription
             isLoading = false
+            print("API Error fetching exercises: \(error)")
         } catch {
             errorMessage = "Failed to fetch exercises: \(error.localizedDescription)"
             isLoading = false
+            print("Unknown error fetching exercises: \(error)")
         }
+    }
+    
+    // Refresh exercises data from server
+    func refreshExercises() async {
+        await fetchExercises()
     }
     
     // Filter exercises by symptom
@@ -101,16 +112,37 @@ class ExercisesViewModel: ObservableObject {
     // Mark an exercise as completed
     func toggleExerciseCompletion(exercise: Exercise) async {
         do {
-            let _ = try await exerciseService.updateExercise(id: exercise.id, completed: !exercise.completed)
+            print("Toggling exercise completion for ID: \(exercise.id), current status: \(exercise.completed)")
+            
+            // Call API to update exercise status
+            let updatedExercise = try await exerciseService.updateExercise(
+                id: exercise.id, 
+                completed: !exercise.completed
+            )
+            
+            print("API returned updated exercise with completion status: \(updatedExercise.completed)")
             
             // Update local data after successful API call
             if let index = exercises.firstIndex(where: { $0.id == exercise.id }) {
-                var updatedExercise = exercises[index]
-                updatedExercise.completed = !updatedExercise.completed
+                // Update using the response from the server
                 exercises[index] = updatedExercise
+                print("Updated local exercise with completion status: \(exercises[index].completed)")
+                
+                // Force UI refresh
+                self.objectWillChange.send()
+            } else {
+                print("Error: Could not find exercise with ID \(exercise.id) in local data")
+            }
+            
+            // Refresh data from server after a short delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                Task {
+                    await self.refreshExercises()
+                }
             }
         } catch {
             errorMessage = "Failed to update exercise: \(error.localizedDescription)"
+            print("Error toggling exercise completion: \(error)")
         }
     }
     
@@ -123,6 +155,7 @@ class ExercisesViewModel: ObservableObject {
             exercises.removeAll { $0.id == id }
         } catch {
             errorMessage = "Failed to delete exercise: \(error.localizedDescription)"
+            print("Error deleting exercise: \(error)")
         }
     }
     
@@ -144,6 +177,7 @@ class ExercisesViewModel: ObservableObject {
         } catch {
             errorMessage = "Failed to generate exercises: \(error.localizedDescription)"
             isLoading = false
+            print("Error generating exercises: \(error)")
         }
     }
 } 

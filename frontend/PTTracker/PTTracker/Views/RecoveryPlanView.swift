@@ -10,106 +10,110 @@ struct RecoveryPlanView: View {
     @State private var selectedTabIndex = 0
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // Tab selector for Weekly/Calendar/List views
-                Picker("View Mode", selection: $selectedTabIndex) {
-                    Text("Weekly").tag(0)
-                    Text("Calendar").tag(1)
-                    Text("List").tag(2)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding()
-                
-                // Filter by symptom
-                if !symptomViewModel.symptoms.isEmpty {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 10) {
+        VStack(spacing: 0) {
+            // Tab selector for Weekly/Calendar/List views
+            Picker("View Mode", selection: $selectedTabIndex) {
+                Text("Weekly").tag(0)
+                Text("Calendar").tag(1)
+                Text("List").tag(2)
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding()
+            
+            // Filter by symptom
+            if !symptomViewModel.symptoms.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        Button(action: {
+                            exercisesViewModel.filterBySymptom(symptomId: nil)
+                        }) {
+                            Text("All")
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(exercisesViewModel.filterSymptomId == nil ? Color.blue : Color.gray.opacity(0.2))
+                                .foregroundColor(exercisesViewModel.filterSymptomId == nil ? .white : .primary)
+                                .cornerRadius(20)
+                        }
+                        
+                        ForEach(symptomViewModel.symptoms) { symptom in
                             Button(action: {
-                                exercisesViewModel.filterBySymptom(symptomId: nil)
+                                exercisesViewModel.filterBySymptom(symptomId: symptom.id)
                             }) {
-                                Text("All")
+                                Text(symptom.bodyPart)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
-                                    .background(exercisesViewModel.filterSymptomId == nil ? Color.blue : Color.gray.opacity(0.2))
-                                    .foregroundColor(exercisesViewModel.filterSymptomId == nil ? .white : .primary)
+                                    .background(exercisesViewModel.filterSymptomId == symptom.id ? Color.blue : Color.gray.opacity(0.2))
+                                    .foregroundColor(exercisesViewModel.filterSymptomId == symptom.id ? .white : .primary)
                                     .cornerRadius(20)
                             }
-                            
-                            ForEach(symptomViewModel.symptoms) { symptom in
-                                Button(action: {
-                                    exercisesViewModel.filterBySymptom(symptomId: symptom.id)
-                                }) {
-                                    Text(symptom.bodyPart)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(exercisesViewModel.filterSymptomId == symptom.id ? Color.blue : Color.gray.opacity(0.2))
-                                        .foregroundColor(exercisesViewModel.filterSymptomId == symptom.id ? .white : .primary)
-                                        .cornerRadius(20)
-                                }
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                    .padding(.bottom)
-                }
-                
-                Divider()
-                
-                // Content based on selected tab
-                if exercisesViewModel.isLoading {
-                    ProgressView("Loading exercises...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if let errorMessage = exercisesViewModel.errorMessage {
-                    VStack {
-                        Text("Error: \(errorMessage)")
-                            .foregroundColor(.red)
-                        Button("Retry") {
-                            Task {
-                                await exercisesViewModel.fetchExercises()
-                            }
-                        }
-                        .padding()
-                    }
-                } else {
-                    TabView(selection: $selectedTabIndex) {
-                        // Weekly view
-                        WeeklyView(viewModel: exercisesViewModel, selectedDate: $selectedDate)
-                            .tag(0)
-                        
-                        // Calendar view
-                        CalendarView(viewModel: exercisesViewModel, selectedDate: $selectedDate)
-                            .tag(1)
-                        
-                        // List view
-                        ExerciseListView(viewModel: exercisesViewModel)
-                            .tag(2)
-                    }
-                    .tabViewStyle(.page(indexDisplayMode: .never))
-                    .animation(.easeInOut, value: selectedTabIndex)
-                }
-            }
-            .navigationTitle("Recovery Plan")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showingGenerateSheet = true
-                    }) {
-                        HStack {
-                            Image(systemName: "wand.and.stars")
-                            Text("Generate")
                         }
                     }
-                    .disabled(symptomViewModel.symptoms.isEmpty)
+                    .padding(.horizontal)
                 }
+                .padding(.bottom)
             }
-            .sheet(isPresented: $showingGenerateSheet) {
-                GenerateExercisesView(isPresented: $showingGenerateSheet, exercisesViewModel: exercisesViewModel)
+            
+            Divider()
+            
+            // Content based on selected tab
+            if exercisesViewModel.isLoading {
+                ProgressView("Loading exercises...")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let errorMessage = exercisesViewModel.errorMessage {
+                VStack {
+                    Text("Error: \(errorMessage)")
+                        .foregroundColor(.red)
+                    Button("Retry") {
+                        Task {
+                            await exercisesViewModel.fetchExercises()
+                        }
+                    }
+                    .padding()
+                }
+            } else {
+                TabView(selection: $selectedTabIndex) {
+                    // Weekly view
+                    WeeklyView(viewModel: exercisesViewModel, selectedDate: $selectedDate)
+                        .tag(0)
+                    
+                    // Calendar view
+                    CalendarView(viewModel: exercisesViewModel, selectedDate: $selectedDate)
+                        .tag(1)
+                    
+                    // List view
+                    ExerciseListView(viewModel: exercisesViewModel)
+                        .tag(2)
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .animation(.easeInOut, value: selectedTabIndex)
             }
+        }
+        .navigationTitle("Recovery Plan")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    showingGenerateSheet = true
+                }) {
+                    HStack {
+                        Image(systemName: "wand.and.stars")
+                        Text("Generate")
+                    }
+                }
+                .disabled(symptomViewModel.symptoms.isEmpty)
+            }
+        }
+        .sheet(isPresented: $showingGenerateSheet) {
+            GenerateExercisesView(isPresented: $showingGenerateSheet, exercisesViewModel: exercisesViewModel)
         }
         .onAppear {
             Task {
                 await exercisesViewModel.fetchExercises()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            // Refresh data when app enters foreground
+            Task {
+                await exercisesViewModel.refreshExercises()
             }
         }
     }
@@ -151,23 +155,32 @@ struct WeeklyView: View {
             // Week days with exercise indicators
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 10) {
                 ForEach(weekDates, id: \.self) { date in
-                    VStack {
+                    VStack(spacing: 2) {
                         Text(date.formatted(.dateTime.day()))
-                            .padding(8)
+                            .padding(6)
                             .background(isSelected(date) ? Color.blue : Color.clear)
                             .foregroundColor(isSelected(date) ? .white : .primary)
                             .clipShape(Circle())
+                            .frame(height: 30)
                         
-                        // Exercise indicators
-                        let exercisesForDay = viewModel.exercisesForDate(date)
-                        if !exercisesForDay.isEmpty {
-                            Text("\(exercisesForDay.count)")
-                                .font(.caption)
-                                .padding(4)
-                                .background(Color.blue.opacity(0.2))
-                                .cornerRadius(10)
+                        // Exercise indicators with consistent height
+                        Group {
+                            let exercisesForDay = viewModel.exercisesForDate(date)
+                            if !exercisesForDay.isEmpty {
+                                Text("\(exercisesForDay.count)")
+                                    .font(.caption)
+                                    .padding(.horizontal, 4)
+                                    .padding(.vertical, 1)
+                                    .background(Color.blue.opacity(0.2))
+                                    .cornerRadius(8)
+                            } else {
+                                Color.clear
+                            }
                         }
+                        .frame(height: 16)
                     }
+                    .frame(height: 55)
+                    .contentShape(Rectangle()) // Make entire cell tappable
                     .onTapGesture {
                         selectedDate = date
                     }
@@ -415,23 +428,33 @@ struct CalendarCellView: View {
     let exerciseCount: Int
     
     var body: some View {
-        VStack {
+        VStack(spacing: 2) {
+            // Date indicator - always consistent placement
             Text(date.formatted(.dateTime.day()))
                 .foregroundColor(cellTextColor)
-                .padding(8)
+                .padding(6)
                 .background(isSelected ? Color.blue : Color.clear)
-                .foregroundColor(isSelected ? .white : .primary)
+                .foregroundColor(isSelected ? .white : cellTextColor)
                 .clipShape(Circle())
+                .frame(height: 30)
             
-            if exerciseCount > 0 {
-                Text("\(exerciseCount)")
-                    .font(.caption)
-                    .padding(4)
-                    .background(Color.blue.opacity(0.2))
-                    .cornerRadius(10)
+            // Exercise count or empty space - always has height
+            Group {
+                if exerciseCount > 0 {
+                    Text("\(exerciseCount)")
+                        .font(.caption)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 1)
+                        .background(Color.blue.opacity(0.2))
+                        .cornerRadius(8)
+                } else {
+                    Color.clear
+                }
             }
+            .frame(height: 16)
         }
-        .frame(height: 50)
+        .frame(height: 55)
+        .contentShape(Rectangle()) // Make the entire cell tappable
     }
     
     var cellTextColor: Color {
@@ -507,6 +530,7 @@ struct ExerciseRowView: View {
     let exercise: Exercise
     let toggleCompletion: () -> Void
     @ObservedObject var viewModel: ExercisesViewModel
+    @State private var isToggling = false
     
     var body: some View {
         NavigationLink(destination: ExerciseDetailView(viewModel: viewModel, exercise: exercise)) {
@@ -526,10 +550,27 @@ struct ExerciseRowView: View {
                     
                     Spacer()
                     
-                    Button(action: toggleCompletion) {
-                        Image(systemName: exercise.completed ? "checkmark.circle.fill" : "circle")
-                            .foregroundColor(exercise.completed ? .green : .gray)
-                            .font(.title2)
+                    // Using ZStack to prevent NavigationLink activation when toggling
+                    ZStack {
+                        Button(action: {
+                            isToggling = true
+                            toggleCompletion()
+                            
+                            // Add slight delay to show animation
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                isToggling = false
+                            }
+                        }) {
+                            if isToggling {
+                                ProgressView()
+                                    .frame(width: 28, height: 28)
+                            } else {
+                                Image(systemName: exercise.completed ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(exercise.completed ? .green : .gray)
+                                    .font(.title2)
+                            }
+                        }
+                        .buttonStyle(BorderlessButtonStyle()) // This prevents the NavigationLink from activating
                     }
                 }
                 
