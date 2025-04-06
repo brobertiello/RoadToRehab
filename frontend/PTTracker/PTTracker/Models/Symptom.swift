@@ -1,6 +1,6 @@
 import Foundation
 
-struct Severity: Codable, Identifiable {
+struct Severity: Codable, Identifiable, Equatable {
     var id: String {
         return date.timeIntervalSince1970.description
     }
@@ -63,6 +63,12 @@ struct Severity: Codable, Identifiable {
         self.value = value
         self.date = date
         self.notes = notes
+    }
+    
+    // Equatable implementation
+    static func == (lhs: Severity, rhs: Severity) -> Bool {
+        // Compare by unique properties: date and value
+        return lhs.date == rhs.date && lhs.value == rhs.value
     }
 }
 
