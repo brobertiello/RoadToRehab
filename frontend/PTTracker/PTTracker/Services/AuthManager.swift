@@ -26,7 +26,15 @@ class AuthManager: ObservableObject {
             // Try to get user data from keychain
             if let userData = keychainHelper.getUserData(account: accountKey) {
                 do {
-                    let user = try JSONDecoder().decode(User.self, from: userData)
+                    let decoder = JSONDecoder()
+                    
+                    // Set up date decoding strategy for proper date parsing
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+                    dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+                    decoder.dateDecodingStrategy = .formatted(dateFormatter)
+                    
+                    let user = try decoder.decode(User.self, from: userData)
                     self.currentUser = user
                     self.isAuthenticated = true
                     print("Session restored for user: \(user.name)")
@@ -40,17 +48,74 @@ class AuthManager: ObservableObject {
     }
     
     private func saveSession(user: User, token: String) {
+        // Print diagnostic information
+        printDateDiagnostics(user: user)
+        
         // Save token to keychain
         keychainHelper.saveToken(token, account: accountKey)
         
         // Save user data to keychain
         do {
-            let userData = try JSONEncoder().encode(user)
+            let encoder = JSONEncoder()
+            
+            // Set up date encoding strategy to match our decoding strategy
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            encoder.dateEncodingStrategy = .formatted(dateFormatter)
+            
+            let userData = try encoder.encode(user)
             keychainHelper.saveUser(userData, account: accountKey)
             print("Session saved for user: \(user.name)")
         } catch {
             print("Failed to encode user data: \(error)")
         }
+    }
+    
+    private func printDateDiagnostics(user: User) {
+        print("--- USER DATE DIAGNOSTICS ---")
+        print("User: \(user.name) - \(user.email)")
+        print("Date Joined Raw: \(user.dateJoined)")
+        print("Date Joined Timestamp: \(user.dateJoined.timeIntervalSince1970)")
+        
+        let joinedFormatter = DateFormatter()
+        joinedFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+        print("Date Joined Formatted: \(joinedFormatter.string(from: user.dateJoined))")
+        
+        print("Last Login Raw: \(user.lastLogin)")
+        print("Last Login Timestamp: \(user.lastLogin.timeIntervalSince1970)")
+        print("Last Login Formatted: \(joinedFormatter.string(from: user.lastLogin))")
+        print("------------------------")
+    }
+    
+    private func parseAPIDate(_ dateString: String) -> Date? {
+        // Try ISO8601
+        if let date = ISO8601DateFormatter().date(from: dateString) {
+            return date
+        }
+        
+        // Try common MongoDB date formats
+        let formats = [
+            "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ssZ",
+            "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        ]
+        
+        for format in formats {
+            let formatter = DateFormatter()
+            formatter.dateFormat = format
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.timeZone = TimeZone(secondsFromGMT: 0)
+            
+            if let date = formatter.date(from: dateString) {
+                return date
+            }
+        }
+        
+        // Log the failure
+        print("Failed to parse API date string: \(dateString)")
+        return nil
     }
     
     func register(name: String, email: String, password: String) async throws -> Bool {
@@ -98,6 +163,12 @@ class AuthManager: ObservableObject {
             let decoder = JSONDecoder()
             // Don't use snake case conversion since MongoDB uses camelCase already
             
+            // Set up date decoding strategy for proper date parsing
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            decoder.dateDecodingStrategy = .formatted(dateFormatter)
+            
             // First try parsing the full auth response
             let authResponse = try decoder.decode(AuthResponse.self, from: data)
             
@@ -123,12 +194,34 @@ class AuthManager: ObservableObject {
                let name = userDict["name"] as? String,
                let email = userDict["email"] as? String {
                 
-                // Create user manually if JSON parsing fails
+                // Try to parse dates from the response
+                var dateJoined = Date()
+                var lastLogin = Date()
+                
+                // Try to extract dateJoined
+                if let dateJoinedValue = userDict["dateJoined"] as? String {
+                    if let parsedDate = parseAPIDate(dateJoinedValue) {
+                        dateJoined = parsedDate
+                    }
+                } else if let dateJoinedTimestamp = userDict["dateJoined"] as? TimeInterval {
+                    dateJoined = Date(timeIntervalSince1970: dateJoinedTimestamp / 1000.0)
+                }
+                
+                // Try to extract lastLogin
+                if let lastLoginValue = userDict["lastLogin"] as? String {
+                    if let parsedDate = parseAPIDate(lastLoginValue) {
+                        lastLogin = parsedDate
+                    }
+                } else if let lastLoginTimestamp = userDict["lastLogin"] as? TimeInterval {
+                    lastLogin = Date(timeIntervalSince1970: lastLoginTimestamp / 1000.0)
+                }
+                
+                // Create user with extracted or default dates
                 let user = User(id: id, 
                                 name: name, 
                                 email: email, 
-                                dateJoined: Date(), 
-                                lastLogin: Date())
+                                dateJoined: dateJoined, 
+                                lastLogin: lastLogin)
                 
                 DispatchQueue.main.async {
                     self.currentUser = user
@@ -191,6 +284,12 @@ class AuthManager: ObservableObject {
             let decoder = JSONDecoder()
             // Don't use snake case conversion since MongoDB uses camelCase already
             
+            // Set up date decoding strategy for proper date parsing
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+            dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+            decoder.dateDecodingStrategy = .formatted(dateFormatter)
+            
             // First try parsing the full auth response
             let authResponse = try decoder.decode(AuthResponse.self, from: data)
             
@@ -216,12 +315,34 @@ class AuthManager: ObservableObject {
                let name = userDict["name"] as? String,
                let email = userDict["email"] as? String {
                 
-                // Create user manually if JSON parsing fails
+                // Try to parse dates from the response
+                var dateJoined = Date()
+                var lastLogin = Date()
+                
+                // Try to extract dateJoined
+                if let dateJoinedValue = userDict["dateJoined"] as? String {
+                    if let parsedDate = parseAPIDate(dateJoinedValue) {
+                        dateJoined = parsedDate
+                    }
+                } else if let dateJoinedTimestamp = userDict["dateJoined"] as? TimeInterval {
+                    dateJoined = Date(timeIntervalSince1970: dateJoinedTimestamp / 1000.0)
+                }
+                
+                // Try to extract lastLogin
+                if let lastLoginValue = userDict["lastLogin"] as? String {
+                    if let parsedDate = parseAPIDate(lastLoginValue) {
+                        lastLogin = parsedDate
+                    }
+                } else if let lastLoginTimestamp = userDict["lastLogin"] as? TimeInterval {
+                    lastLogin = Date(timeIntervalSince1970: lastLoginTimestamp / 1000.0)
+                }
+                
+                // Create user with extracted or default dates
                 let user = User(id: id, 
                                 name: name, 
                                 email: email, 
-                                dateJoined: Date(), 
-                                lastLogin: Date())
+                                dateJoined: dateJoined, 
+                                lastLogin: lastLogin)
                 
                 DispatchQueue.main.async {
                     self.currentUser = user

@@ -60,25 +60,45 @@ struct User: Codable, Identifiable {
     
     // Helper function to parse date strings in various formats
     private static func parseDate(_ dateString: String) -> Date? {
-        // Try ISO8601
+        // Try ISO8601 with extended format
+        let iso8601Formatter = ISO8601DateFormatter()
+        iso8601Formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = iso8601Formatter.date(from: dateString) {
+            return date
+        }
+        
+        // Try standard ISO8601
         if let date = ISO8601DateFormatter().date(from: dateString) {
             return date
         }
         
-        // Try MongoDB format
+        // Try MongoDB formats
         let formats = [
             "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-            "yyyy-MM-dd'T'HH:mm:ssZ"
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ssZ",
+            "yyyy-MM-dd'T'HH:mm:ss'Z'"
         ]
         
         for format in formats {
             let formatter = DateFormatter()
             formatter.dateFormat = format
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.timeZone = TimeZone(secondsFromGMT: 0)
+            
             if let date = formatter.date(from: dateString) {
                 return date
             }
         }
         
+        // If all else fails, try to parse a numeric value (for timestamps)
+        if let timestampValue = Double(dateString) {
+            // MongoDB timestamps are in milliseconds
+            return Date(timeIntervalSince1970: timestampValue / 1000.0)
+        }
+        
+        // Log the failure for debugging
+        print("Failed to parse date string: \(dateString)")
         return nil
     }
 } 

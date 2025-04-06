@@ -79,6 +79,13 @@ class KeychainHelper {
         return read(service: "PTTrackerUserData", account: account)
     }
     
+    func getUserDataString(account: String) -> String? {
+        guard let data = getUserData(account: account) else {
+            return nil
+        }
+        return String(data: data, encoding: .utf8)
+    }
+    
     func clearAuthData(account: String) {
         delete(service: "PTTrackerAuthToken", account: account)
         delete(service: "PTTrackerUserData", account: account)
