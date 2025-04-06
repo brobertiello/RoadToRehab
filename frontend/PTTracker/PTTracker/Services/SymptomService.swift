@@ -1,7 +1,7 @@
 import Foundation
 
 class SymptomService {
-    private let baseURL = "http://localhost:3001/api/symptoms"
+    private let baseURL = "https://roadtorehab-f3497696e3ef.herokuapp.com/api/symptoms"
     private let authManager: AuthManager
     
     init(authManager: AuthManager) {
