@@ -139,8 +139,21 @@ struct SymptomRow: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(symptom.bodyPart)
-                .font(.headline)
+            HStack {
+                Text(symptom.bodyPart)
+                    .font(.headline)
+                
+                if symptom.severities.count > 1 {
+                    Spacer()
+                    Text("\(symptom.severities.count) records")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(10)
+                }
+            }
             
             HStack {
                 Text("Pain Level: \(symptom.currentSeverity)/10")

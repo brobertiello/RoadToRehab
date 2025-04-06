@@ -64,14 +64,18 @@ class SymptomService {
         // Use a format MongoDB will accept
         let currentDate = ISO8601DateFormatter().string(from: Date())
         
+        // Build the severity object with optional notes
+        var severityObj: [String: Any] = ["value": severity, "date": currentDate]
+        if let notes = notes {
+            severityObj["notes"] = notes
+        }
+        
         var body: [String: Any] = [
             "bodyPart": bodyPart,
-            "severities": [
-                ["value": severity, "date": currentDate]
-            ]
+            "severities": [severityObj]
         ]
         
-        // Add notes if provided
+        // Add notes to the main document as well
         if let notes = notes {
             body["notes"] = notes
         }
@@ -125,11 +129,15 @@ class SymptomService {
         // Use a format MongoDB will accept
         let currentDate = ISO8601DateFormatter().string(from: Date())
         
-        // Preparing the update data
+        // Build the severity object with optional notes
+        var severityObj: [String: Any] = ["value": severity, "date": currentDate]
+        if let notes = notes {
+            severityObj["notes"] = notes
+        }
+        
+        // Preparing the update data - now we're sending just the new severity to append
         var body: [String: Any] = [
-            "severities": [
-                ["value": severity, "date": currentDate]
-            ]
+            "severities": [severityObj]
         ]
         
         // Add notes update if provided

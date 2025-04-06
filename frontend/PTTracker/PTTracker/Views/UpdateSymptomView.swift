@@ -1,4 +1,5 @@
 import SwiftUI
+import Charts
 
 struct UpdateSymptomView: View {
     @Environment(\.dismiss) var dismiss
@@ -51,6 +52,51 @@ struct UpdateSymptomView: View {
                     Text("Add details about your symptoms that might help with recovery planning")
                         .font(.caption)
                         .foregroundColor(.gray)
+                }
+                
+                if symptom.severities.count > 1 {
+                    Section(header: Text("Pain History")) {
+                        SeverityHistoryChart(severities: symptom.severities)
+                            .frame(height: 200)
+                            .padding(.vertical, 8)
+                        
+                        // Display historical notes
+                        if symptom.severities.contains(where: { $0.notes != nil }) {
+                            Divider()
+                                .padding(.vertical, 4)
+                            
+                            Text("Historical Notes:")
+                                .font(.headline)
+                                .padding(.top, 8)
+                            
+                            // Show notes from each severity entry, newest first
+                            let sortedSeverities = symptom.severities
+                                .sorted(by: { $0.date > $1.date })
+                                .filter { $0.notes != nil && !$0.notes!.isEmpty }
+                            
+                            ForEach(sortedSeverities) { severity in
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Text(formatDate(severity.date))
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                        
+                                        Text("(Pain Level: \(severity.value))")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Text(severity.notes ?? "")
+                                        .padding(.bottom, 8)
+                                    
+                                    if severity != sortedSeverities.last {
+                                        Divider()
+                                            .padding(.bottom, 8)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 
                 if let errorMessage = errorMessage {
@@ -112,5 +158,91 @@ struct UpdateSymptomView: View {
                 }
             }
         }
+    }
+    
+    // Helper function to format dates
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+}
+
+struct SeverityHistoryChart: View {
+    let severities: [Severity]
+    
+    var chartData: [ChartDataPoint] {
+        // Create a sorted array of data points from oldest to newest
+        let sortedSeverities = severities.sorted { $0.date < $1.date }
+        return sortedSeverities.map { severity in
+            ChartDataPoint(date: severity.date, value: severity.value)
+        }
+    }
+    
+    // Date formatter for the x-axis
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd"
+        return formatter
+    }()
+    
+    var body: some View {
+        if #available(iOS 16.0, *) {
+            Chart {
+                ForEach(chartData) { dataPoint in
+                    LineMark(
+                        x: .value("Date", dataPoint.date),
+                        y: .value("Pain Level", dataPoint.value)
+                    )
+                    .foregroundStyle(Color.red.gradient)
+                    .interpolationMethod(.cardinal)
+                    
+                    PointMark(
+                        x: .value("Date", dataPoint.date),
+                        y: .value("Pain Level", dataPoint.value)
+                    )
+                    .foregroundStyle(Color.red)
+                }
+            }
+            .chartXAxis {
+                AxisMarks(values: .automatic(desiredCount: min(chartData.count, 5))) { value in
+                    if let date = value.as(Date.self) {
+                        AxisValueLabel {
+                            Text(dateFormatter.string(from: date))
+                        }
+                    }
+                }
+            }
+            .chartYAxis {
+                AxisMarks(values: .stride(by: 1)) { value in
+                    if let intValue = value.as(Int.self), intValue <= 10 {
+                        AxisValueLabel {
+                            Text("\(intValue)")
+                        }
+                    }
+                }
+            }
+            .chartYScale(domain: 0...10)
+        } else {
+            // Fallback for iOS 15
+            Text("Pain history chart requires iOS 16 or later")
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
+    }
+}
+
+// Data structure for the chart
+struct ChartDataPoint: Identifiable {
+    let id = UUID()
+    let date: Date
+    let value: Int
+}
+
+// Extension to check if an optional string is nil or empty
+extension Optional where Wrapped == String {
+    var isNilOrEmpty: Bool {
+        return self == nil || self!.isEmpty
     }
 } 

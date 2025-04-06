@@ -6,15 +6,18 @@ struct Severity: Codable, Identifiable {
     }
     let value: Int
     let date: Date
+    let notes: String?
     
     enum CodingKeys: String, CodingKey {
         case value
         case date
+        case notes
     }
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         value = try container.decode(Int.self, forKey: .value)
+        notes = try container.decodeIfPresent(String.self, forKey: .notes)
         
         // Try different date formats that MongoDB might return
         if let dateString = try? container.decode(String.self, forKey: .date) {
@@ -56,9 +59,10 @@ struct Severity: Codable, Identifiable {
     }
     
     // Regular initializer for creating severities locally
-    init(value: Int, date: Date) {
+    init(value: Int, date: Date, notes: String? = nil) {
         self.value = value
         self.date = date
+        self.notes = notes
     }
 }
 
@@ -81,7 +85,7 @@ struct Symptom: Codable, Identifiable {
         self.bodyPart = bodyPart
         self.notes = notes
         self.severities = [
-            Severity(value: severity, date: Date())
+            Severity(value: severity, date: Date(), notes: notes)
         ]
     }
     
