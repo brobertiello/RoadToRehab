@@ -229,8 +229,6 @@ Follow these steps to set up the development environment.
 
 ## Project Structure
 
-Below is a suggested structure for organizing your project:
-
 ```
 physical-therapy-home-exercise-tracker/
 ├── backend/
@@ -279,4 +277,4 @@ This project is licensed under the MIT License.
 
 For any questions or further information, please contact:
 
-- [Your Name](mailto:your.email@example.com)
+- [Brandon Robertiello](mailto:br.robertiello@gmail.com)
