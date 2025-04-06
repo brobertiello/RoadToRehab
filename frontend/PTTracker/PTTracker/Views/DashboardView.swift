@@ -2,11 +2,25 @@ import SwiftUI
 
 struct DashboardView: View {
     @EnvironmentObject var authManager: AuthManager
-    @EnvironmentObject var chatViewModel: ChatViewModel
+    @StateObject private var chatViewModel: ChatViewModel
     @EnvironmentObject var symptomsViewModel: SymptomsViewModel
     @EnvironmentObject var exercisesViewModel: ExercisesViewModel
     @State private var selectedTab = 0
     @State private var showChatView = false
+    
+    init() {
+        // Initialize ChatViewModel with empty instances that will be replaced
+        // with the actual environment objects when the view is created
+        let authManager = AuthManager.shared
+        let symptomsVM = SymptomsViewModel(authManager: authManager)
+        let exercisesVM = ExercisesViewModel(authManager: authManager)
+        
+        _chatViewModel = StateObject(wrappedValue: ChatViewModel(
+            authManager: authManager,
+            symptomViewModel: symptomsVM,
+            exercisesViewModel: exercisesVM
+        ))
+    }
     
     var body: some View {
         ZStack {
@@ -55,6 +69,12 @@ struct DashboardView: View {
                 HStack {
                     Spacer()
                     Button {
+                        // Update chat view model with current environment values before showing
+                        chatViewModel.updateReferences(
+                            authManager: authManager,
+                            symptomViewModel: symptomsViewModel,
+                            exercisesViewModel: exercisesViewModel
+                        )
                         showChatView = true
                     } label: {
                         Image(systemName: "message.fill")
@@ -78,6 +98,13 @@ struct DashboardView: View {
             Task {
                 await symptomsViewModel.fetchSymptoms()
                 await exercisesViewModel.fetchExercises()
+                
+                // Update chat view model with current environment values
+                chatViewModel.updateReferences(
+                    authManager: authManager,
+                    symptomViewModel: symptomsViewModel,
+                    exercisesViewModel: exercisesViewModel
+                )
             }
         }
     }

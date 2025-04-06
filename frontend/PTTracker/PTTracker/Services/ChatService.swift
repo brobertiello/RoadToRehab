@@ -8,7 +8,10 @@ class ChatService {
         self.authManager = authManager
     }
     
-    func sendMessage(_ message: String) async throws -> ChatResponse {
+    func sendMessage(_ message: String, 
+                    userName: String = "User", 
+                    symptomsContext: String = "", 
+                    exercisesContext: String = "") async throws -> ChatResponse {
         guard let token = authManager.authToken else {
             throw APIError.unauthorized
         }
@@ -17,8 +20,58 @@ class ChatService {
             throw APIError.invalidURL
         }
         
+        // Create system context
+        let contextString = """
+        USER PROFILE:
+        Name: \(userName)
+        
+        CURRENT SYMPTOMS:
+        \(symptomsContext)
+        
+        RECOVERY PLAN FOR THE COMING WEEK:
+        \(exercisesContext)
+        
+        Please remember this information and refer to it in your responses as appropriate.
+        Respond in plain text only.
+        """
+        
+        // Combine context and message for the backend
+        // This ensures the context is processed as part of the message
+        let combinedMessage = """
+        [SYSTEM INFORMATION]
+        You are a professional physical therapy assistant AI for the RoadToRehab application. Your purpose is to provide supportive, educational guidance to users recovering from injuries or managing chronic conditions.
+
+        Guidelines:
+        1. Be compassionate, encouraging, and supportive in your responses.
+        2. Provide scientifically accurate information about physical therapy, recovery, and exercises.
+        3. Explain complex medical concepts in simple, easy-to-understand language.
+        4. Do not make specific medical diagnoses - instead, guide users to seek professional medical advice when appropriate.
+        5. Acknowledge the user's symptoms and recovery progress in your responses ONLY when directly relevant to their question.
+        6. Suggest general motivation and adherence strategies to help users stick with their recovery plan.
+        7. Always respond in plain text without formatting.
+        8. Keep responses concise and focused on the user's question.
+        9. If you don't know an answer, be honest and suggest consulting their physical therapist.
+        10. Maintain a professional, friendly tone.
+        
+        IMPORTANT: The information in [USER INFORMATION] section is provided as background context ONLY. Do NOT repeat or mention this information in your responses unless:
+        - The user specifically asks about their symptoms, exercises, or profile
+        - Your response directly requires referencing this information to answer the user's question
+        - It is contextually appropriate and natural to mention a specific detail
+        
+        DO NOT start your responses by listing or summarizing the user's information.
+        DO NOT acknowledge that you've been provided with this information.
+        DO focus on directly answering what the user is asking about.
+        
+        [USER INFORMATION]
+        \(contextString)
+
+        [USER MESSAGE]
+        \(message)
+        """
+        
+        // The backend only expects the raw message 
         let body: [String: Any] = [
-            "message": message
+            "message": combinedMessage
         ]
         
         var request = URLRequest(url: url)
@@ -28,6 +81,7 @@ class ChatService {
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         
         print("Sending chat message to: \(url.absoluteString)")
+        
         let (data, response) = try await URLSession.shared.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -51,114 +105,11 @@ class ChatService {
         do {
             let decoder = JSONDecoder()
             let chatResponse = try decoder.decode(ChatResponse.self, from: data)
-            
-            // Convert markdown to HTML if needed
-            let htmlResponse = markdownToHTML(chatResponse.response)
-            return ChatResponse(response: htmlResponse)
+            return ChatResponse(response: chatResponse.response)
         } catch {
             print("Failed to decode chat response: \(error)")
             throw APIError.decodingFailed
         }
-    }
-    
-    /// Converts markdown text to HTML
-    /// - Parameter markdown: The markdown text to convert
-    /// - Returns: HTML representation of the markdown
-    private func markdownToHTML(_ markdown: String) -> String {
-        var html = markdown
-        
-        // Simplify the HTML for better AttributedString compatibility
-        
-        // Handle code blocks
-        html = html.replacingOccurrences(
-            of: "```([\\s\\S]*?)```",
-            with: "<pre>$1</pre>",
-            options: .regularExpression
-        )
-        
-        // Handle inline code
-        html = html.replacingOccurrences(
-            of: "`([^`]+)`",
-            with: "<code>$1</code>",
-            options: .regularExpression
-        )
-        
-        // Handle headers - use a different approach without line anchors
-        // Split the text into lines and process each line
-        var processedLines = html.components(separatedBy: "\n")
-        
-        for i in 0..<processedLines.count {
-            let line = processedLines[i]
-            if line.hasPrefix("# ") {
-                processedLines[i] = "<h1>\(line.dropFirst(2))</h1>"
-            } else if line.hasPrefix("## ") {
-                processedLines[i] = "<h2>\(line.dropFirst(3))</h2>"
-            } else if line.hasPrefix("### ") {
-                processedLines[i] = "<h3>\(line.dropFirst(4))</h3>"
-            }
-        }
-        
-        html = processedLines.joined(separator: "\n")
-        
-        // Handle bold text
-        html = html.replacingOccurrences(
-            of: "\\*\\*([^\\*]+)\\*\\*",
-            with: "<strong>$1</strong>",
-            options: .regularExpression
-        )
-        
-        // Handle italic text
-        html = html.replacingOccurrences(
-            of: "\\*([^\\*]+)\\*",
-            with: "<em>$1</em>",
-            options: .regularExpression
-        )
-        
-        // Handle links
-        html = html.replacingOccurrences(
-            of: "\\[([^\\]]+)\\]\\(([^\\)]+)\\)",
-            with: "<a href=\"$2\">$1</a>",
-            options: .regularExpression
-        )
-        
-        // Handle unordered lists
-        let lines = html.split(separator: "\n")
-        var newLines: [String] = []
-        var inList = false
-        
-        for line in lines {
-            if line.hasPrefix("- ") {
-                if !inList {
-                    newLines.append("<ul>")
-                    inList = true
-                }
-                let content = line.dropFirst(2)
-                newLines.append("<li>\(content)</li>")
-            } else {
-                if inList {
-                    newLines.append("</ul>")
-                    inList = false
-                }
-                newLines.append(String(line))
-            }
-        }
-        
-        if inList {
-            newLines.append("</ul>")
-        }
-        
-        html = newLines.joined(separator: "\n")
-        
-        // Handle line breaks and paragraphs
-        html = html.replacingOccurrences(of: "\n\n", with: "</p><p>")
-        html = html.replacingOccurrences(of: "\n", with: "<br>")
-        
-        // Ensure the content is wrapped in paragraphs
-        if !html.starts(with: "<") {
-            html = "<p>\(html)</p>"
-        }
-        
-        return html
     }
 }
 
@@ -183,8 +134,7 @@ struct ChatMessage: Identifiable {
     }
     
     static func botMessage(_ text: String) -> ChatMessage {
-        // Check if this looks like HTML content
-        let isHTML = text.contains("<") && text.contains(">")
-        return ChatMessage(message: text, isUserMessage: false, timestamp: Date(), isHTML: isHTML)
+        // Always treat responses as plain text now
+        return ChatMessage(message: text, isUserMessage: false, timestamp: Date(), isHTML: false)
     }
 } 
