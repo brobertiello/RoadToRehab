@@ -71,11 +71,16 @@ struct ExerciseDetailView: View {
                 // Exercise details grid
                 VStack(alignment: .leading, spacing: 16) {
                     // Scheduled date with visual calendar
-                    HStack(alignment: .center) {
-                        Label("Scheduled", systemImage: "calendar")
-                            .font(.headline)
-                            .foregroundColor(.blue)
-                            .frame(width: 110, alignment: .leading)
+                    HStack(alignment: .center, spacing: 8) {
+                        Label {
+                            Text("Scheduled")
+                                .font(.headline)
+                                .foregroundColor(.blue)
+                        } icon: {
+                            Image(systemName: "calendar")
+                                .foregroundColor(.blue)
+                        }
+                        .frame(minWidth: 120, alignment: .leading)
                         
                         Spacer()
                         
@@ -108,11 +113,16 @@ struct ExerciseDetailView: View {
                     .padding(.horizontal)
                     
                     // Duration info
-                    HStack {
-                        Label("Duration", systemImage: "clock")
-                            .font(.headline)
-                            .foregroundColor(.blue)
-                            .frame(width: 110, alignment: .leading)
+                    HStack(alignment: .center, spacing: 8) {
+                        Label {
+                            Text("Duration")
+                                .font(.headline)
+                                .foregroundColor(.blue)
+                        } icon: {
+                            Image(systemName: "clock")
+                                .foregroundColor(.blue)
+                        }
+                        .frame(minWidth: 120, alignment: .leading)
                         
                         Spacer()
                         
@@ -126,11 +136,16 @@ struct ExerciseDetailView: View {
                     .padding(.horizontal)
                     
                     // Difficulty stars
-                    HStack {
-                        Label("Difficulty", systemImage: "star.fill")
-                            .font(.headline)
-                            .foregroundColor(.blue)
-                            .frame(width: 110, alignment: .leading)
+                    HStack(alignment: .center, spacing: 8) {
+                        Label {
+                            Text("Difficulty")
+                                .font(.headline)
+                                .foregroundColor(.blue)
+                        } icon: {
+                            Image(systemName: "star.fill")
+                                .foregroundColor(.blue)
+                        }
+                        .frame(minWidth: 120, alignment: .leading)
                         
                         Spacer()
                         
@@ -144,11 +159,16 @@ struct ExerciseDetailView: View {
                     .padding(.horizontal)
                     
                     // Status (completed or not)
-                    HStack {
-                        Label("Status", systemImage: "checkmark.circle")
-                            .font(.headline)
-                            .foregroundColor(.blue)
-                            .frame(width: 110, alignment: .leading)
+                    HStack(alignment: .center, spacing: 8) {
+                        Label {
+                            Text("Status")
+                                .font(.headline)
+                                .foregroundColor(.blue)
+                        } icon: {
+                            Image(systemName: "checkmark.circle")
+                                .foregroundColor(.blue)
+                        }
+                        .frame(minWidth: 120, alignment: .leading)
                         
                         Spacer()
                         
@@ -168,9 +188,14 @@ struct ExerciseDetailView: View {
                     
                     // Notes section
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("Notes", systemImage: "note.text")
-                            .font(.headline)
-                            .foregroundColor(.blue)
+                        Label {
+                            Text("Notes")
+                                .font(.headline)
+                                .foregroundColor(.blue)
+                        } icon: {
+                            Image(systemName: "note.text")
+                                .foregroundColor(.blue)
+                        }
                         
                         if isEditing {
                             TextEditor(text: $notes)
