@@ -3,6 +3,7 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var chatViewModel: ChatViewModel
+    @StateObject var symptomsViewModel = SymptomsViewModel()
     @State private var selectedTab = 0
     @State private var showChatView = false
     
@@ -30,6 +31,7 @@ struct DashboardView: View {
                 NavigationView {
                     RecoveryPlanView()
                 }
+                .environmentObject(symptomsViewModel)
                 .tabItem {
                     Image(systemName: "figure.walk")
                     Text("Recovery")
@@ -70,6 +72,12 @@ struct DashboardView: View {
         }
         .sheet(isPresented: $showChatView) {
             ChatView(viewModel: chatViewModel)
+        }
+        .onAppear {
+            // Load symptoms for the recovery plan
+            Task {
+                await symptomsViewModel.fetchSymptoms()
+            }
         }
     }
 }

@@ -11,29 +11,21 @@ const exerciseSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  duration: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  difficulty: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 5,
-  },
-  precautions: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  date: {
-    type: Date,
-    default: Date.now,
-  },
   scheduledDate: {
     type: Date,
-    default: null,
+    required: true,
+  },
+  duration: {
+    type: String,
+    trim: true,
+  },
+  sets: {
+    type: Number,
+    min: 0,
+  },
+  repetitions: {
+    type: Number,
+    min: 0,
   },
   completed: {
     type: Boolean,
@@ -48,6 +40,20 @@ const exerciseSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+  },
+  difficulty: {
+    type: Number,
+    min: 1,
+    max: 5,
+    default: 1,
+  },
+  notes: {
+    type: String,
+    trim: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 
