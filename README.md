@@ -1,4 +1,4 @@
-# PT Tracker
+# Road to Recovery
 
 A comprehensive Physical Therapy Tracking application that helps users monitor their recovery journey.
 
